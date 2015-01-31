@@ -504,18 +504,19 @@ class MM_Metabox extends MetaMaterial
         'permalink'     =>  '#edit-slug-box {display: none;}',
         'the_content'   =>  '#postdivrich {display: none;}',
         'editor'        =>  '#postdivrich {display: none;}',
-        'excerpt'       =>  '#postexcerpt, #screen-meta label[for=postexcerpt-hide] {display: none;}',
-        'custom_fields' =>  '#postcustom, #screen-meta label[for=postcustom-hide] { display: none; }',
-        'discussion'    =>  '#commentstatusdiv, #screen-meta label[for=commentstatusdiv-hide] {display: none;}',
-        'comments'      =>  '#commentsdiv, #screen-meta label[for=commentsdiv-hide] {display: none;}',
-        'slug'          =>  '#slugdiv, #screen-meta label[for=slugdiv-hide] {display: none;}',
-        'author'        =>  '#authordiv, #screen-meta label[for=authordiv-hide] {display: none;}',
-        'format'        =>  '#formatdiv, #screen-meta label[for=formatdiv-hide] {display: none;}',
-        'featured_image'=>  '#postimagediv, #screen-meta label[for=postimagediv-hide] {display: none;}',
-        'revisions'     =>  '#revisionsdiv, #screen-meta label[for=revisionsdiv-hide] {display: none;}',
-        'categories'    =>  '#categorydiv, #screen-meta label[for=categorydiv-hide] {display: none;}',
-        'tags'          =>  '#tagsdiv-post_tag, #screen-meta label[for=tagsdiv-post_tag-hide] {display: none;}',
-        'send-trackbacks'=> '#trackbacksdiv, #screen-meta label[for=trackbacksdiv-hide] {display: none;}' );
+        'excerpt'       =>  '#postexcerpt, #screen-meta label[for="postexcerpt-hide"] {display: none;}',
+        'custom_fields' =>  '#postcustom, #screen-meta label[for="postcustom-hide"] { display: none; }',
+        'discussion'    =>  '#commentstatusdiv, #screen-meta label[for="commentstatusdiv-hide"] {display: none;}',
+        'comments'      =>  '#commentsdiv, #screen-meta label[for="commentsdiv-hide"] {display: none;}',
+        'slug'          =>  '#slugdiv, #screen-meta label[for="slugdiv-hide"] {display: none;}',
+        'author'        =>  '#authordiv, #screen-meta label[for="authordiv-hide"] {display: none;}',
+        'format'        =>  '#formatdiv, #screen-meta label[for="formatdiv-hide"] {display: none;}',
+        'featured_image'=>  '#postimagediv, #screen-meta label[for="postimagediv-hide"] {display: none;}',
+        'revisions'     =>  '#revisionsdiv, #screen-meta label[for="revisionsdiv-hide"] {display: none;}',
+        'categories'    =>  '#categorydiv, #screen-meta label[for="categorydiv-hide"] {display: none;}',
+        'tags'          =>  '#tagsdiv-post_tag, #screen-meta label[for="tagsdiv-post_tag-hide"] {display: none;}',
+        'send-trackbacks'=> '#trackbacksdiv, #screen-meta label[for="trackbacksdiv-hide"] {display: none;}' ,
+        'page_attributes'=> '#pageparentdiv, #screen-meta label[for="pageparentdiv-hide"] {display: none;}' );
 
     /**
      * Private MetaMaterial Constructor
@@ -1199,10 +1200,10 @@ class MM_Metabox extends MetaMaterial
         $out .= ' .postbox.locked.open > h3 { cursor:inherit; }';
         //hide tocopy's
         $out .= ' .mm_group.mm_tocopy { display:none; } ';
-        //spacing for after_editor
-        $out .= ' #after_editor-sortables{ margin-top:20px; }';
         //spacing for after_title
         $out .= ' #after_title-sortables{ margin-top:20px; }';
+        //spacing for after_editor
+        $out .= ' #after_editor-sortables{ margin-top:20px; }';
 
         return $out;
         }else{
@@ -1705,6 +1706,7 @@ class MM_Metabox extends MetaMaterial
             {
                 foreach ($diff_fields as $field)
                 {
+                    $field = ($this->prefix)?$this->meta_key . '_' . $field : $field;
                     delete_post_meta($post_id,$field);
                 }
             }

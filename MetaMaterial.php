@@ -1792,13 +1792,11 @@ abstract class MetaMaterial
 		{
 			if ($length == 0 AND $and_one)
 			{
-				$this->length = 2;
+				$this->length = 1;
 			}
 			else
 			{
-                if($this->in_loop == 'multi') {
-                    $this->length = $length + 1;
-                }
+				$this->length = $length+1;
 			}
 		}
 
@@ -2144,14 +2142,14 @@ abstract class MetaMaterial
         }
 	}
 
-        public static function dumpInstances(){
+    public static function dumpInstances(){
 
-            foreach(self::$instances as $k => $v){
-                error_log($k);
-                foreach($v as $mm){
-                    error_log('     ' . get_class($mm));
-                }
+        foreach(self::$instances as $k => $v){
+            error_log($k);
+            foreach($v as $mm){
+                error_log('     ' . get_class($mm));
             }
-
         }
+
+    }
 }

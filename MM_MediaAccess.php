@@ -21,12 +21,14 @@ namespace HaddowG\MetaMaterial;
      * @access  private
      * @var     array required
      */
-    private $classNames = array(
-                                'id'    =>  'media-field-id',
-                                'thumb' =>  'media-field-thumb',
-                                'url'   =>  'media-field-url',
-                                'trigger'   =>  'media-field-trigger'
-                                );
+     private $classNames = array(
+         'id'    =>  'media-field-id',
+         'thumb' =>  'media-field-thumb',
+         'url'   =>  'media-field-url',
+         'trigger'   =>  'media-field-trigger',
+         'title'     => 'media-field-title',
+         'filename'  => 'media-field-filename'
+     );
 
 
     /**
@@ -199,7 +201,9 @@ namespace HaddowG\MetaMaterial;
             'modal_button_text' =>  $this->modal_button_text,
             'modal_title'       =>  $this->modal_title,
             'file_type'     =>  $this->file_type,
-            'allowed_extensions' => $this->allowed_extensions
+            'allowed_extensions' => $this->allowed_extensions,
+            'placeholderImg'     => $this->placeholderImg,
+            'placeholderImgText'   => $this->placeholderImgText
         );
 
         if (isset($options['class']))
@@ -239,7 +243,11 @@ namespace HaddowG\MetaMaterial;
             }else{
                 $size = $options['thumb_size'];
             }
-            $placeholder[] = 'http://placehold.it/' . $size[0] . 'x' . $size[1] . '&text=Placeholder+Image';
+            if(empty($options['placeholderImg'])){
+                $placeholder[] = 'http://placehold.it/' . $size[0] . 'x' . $size[1] . '&text=' . $options['placeholderImgText'];
+            }else{
+                $placeholder[] = $options['placeholderImg'];
+            }
             $placeholder[] = $size[0];
             $placeholder[] = $size[1];
 
@@ -326,11 +334,11 @@ namespace HaddowG\MetaMaterial;
      * @param   string $type
      * @return  string css class(es)
      */
-    public function getClass($type = 'id')
-    {
-
-        return $this->classNames[$type];
-    }
+     public function getClass($type = 'id', $groupname = null)
+     {
+         $groupname = isset($groupname) ? $groupname : $this->groupname ;
+         return $this->classNames[$type] . '-' . $groupname;
+     }
 
     /**
      * Used to insert a WordPress styled button, should be paired with a text
@@ -546,8 +554,7 @@ namespace HaddowG\MetaMaterial;
                             $mime = $fileType.split('/');
                             if($mime.length==2){
                                 $library = {
-                                    type : $mime[0],
-                                    subtype: $mime[1]
+                                    type : $fileType
                                 }
                             }
                         }
@@ -590,10 +597,44 @@ namespace HaddowG\MetaMaterial;
                         // Do something with attachment here
                         $name = jQuery(media_frame_<?php echo $this->name; ?>_trigger).attr('class').match(/<?php echo $this->classNames['trigger']; ?>-([a-zA-Z0-9_-]*)/i);
                         $name = ($name && $name[1]) ? $name[1] : '' ;
+                        var $context = jQuery(media_frame_<?php echo $this->name; ?>_trigger).closest('.postbox, .mm_taxonomybox');
+                        <?php foreach($this->classNames as $key =>$classname){
+                            if($key!='thumb'){
+                        ?>
+                        $field_<?php echo $key; ?> = jQuery('.<?php echo $classname; ?>-'+$name,$context);
+                        $field_<?php echo $key; ?>.each(function(){
+                            var $this = jQuery(this);
+                            <?php
+                            if($key=='url'){
+                            ?>
+                            if($this.is('a')) {
+                                $this.attr('href',attachment.<?php echo $key; ?>);
+                                if($this.hasClass('both')){
+                                    $this.html(attachment.<?php echo $key; ?>);
+                                }
+                                return;
+                            }
+                            if($this.is('img')) {
+                                $this.attr('src',attachment.<?php echo $key; ?>);
+                                return;
+                            }
+                            <?php
+                            }
+                            ?>
 
-                        $thumb = jQuery('.<?php echo $this->classNames['thumb']; ?>-'+$name,jQuery(media_frame_<?php echo $this->name; ?>_trigger).closest('.postbox, .mm_taxonomybox'));
-                        $idfield = jQuery('.<?php echo $this->classNames['id']; ?>-'+$name,jQuery(media_frame_<?php echo $this->name; ?>_trigger).closest('.postbox, .mm_taxonomybox'));
-                        $urlfield = jQuery('.<?php echo $this->classNames['url']; ?>-'+$name,jQuery(media_frame_<?php echo $this->name; ?>_trigger).closest('.postbox, .mm_taxonomybox'));
+                            if($this.is('input,textarea,select')){
+                                $this.val(attachment.<?php echo $key; ?>);
+                                return;
+                            }
+
+                            $this.html(attachment.<?php echo $key; ?>);
+
+                        });
+                        <?php
+                            }
+                         }
+                        ?>
+                        $thumb = jQuery('.<?php echo $this->classNames['thumb']; ?>-'+$name,$context);
                         $thumb.each(function($i){
                             $thumb_size = jQuery(this).data('thumb_size') || 'thumbnail';
                             $thumb_data = getClosestSize($thumb_size,attachment);
@@ -601,8 +642,8 @@ namespace HaddowG\MetaMaterial;
                             jQuery(this).attr('width',$thumb_data[1]);
                             jQuery(this).attr('height',$thumb_data[2]);
                         });
-                        $idfield.val(attachment.id);
-                        $urlfield.val(attachment.url);
+                            $context.trigger('mm_media', [attachment, $name]);
+                            $context.trigger('mm_media.'+$name, [attachment, $name]);
 
                         });
 
