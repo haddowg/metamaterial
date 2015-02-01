@@ -1,0 +1,16 @@
+{
+    "name": "haddowg/metamaterial",
+    "description": "MetaMaterial is an extensive framework for handling metadata in WordPress.",
+    "license": "GPL-3",
+	"authors": [
+		{
+		  "name": "Greg Haddow",
+		  "email": "greg@greghaddow.co.uk",
+		  "homepage": "https://github.com/haddowg"
+		}
+    ],
+    "minimum-stability": "dev",
+    "require": {
+		"php": ">=5.4.0"
+	}
+}
