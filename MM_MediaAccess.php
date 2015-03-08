@@ -1,5 +1,4 @@
 <?php
-namespace HaddowG\MetaMaterial;
 
 /**
  * @package     MetaMaterial
@@ -29,7 +28,7 @@ namespace HaddowG\MetaMaterial;
  *
  */
 
- class MM_MediaAccess
+class MM_MediaAccess
 {
 
     /**
@@ -40,14 +39,14 @@ namespace HaddowG\MetaMaterial;
      * @access  private
      * @var     array required
      */
-     private $classNames = array(
-         'id'    =>  'media-field-id',
-         'thumb' =>  'media-field-thumb',
-         'url'   =>  'media-field-url',
-         'trigger'   =>  'media-field-trigger',
-         'title'     => 'media-field-title',
-         'filename'  => 'media-field-filename'
-     );
+    private $classNames = array(
+        'id'    =>  'media-field-id',
+        'thumb' =>  'media-field-thumb',
+        'url'   =>  'media-field-url',
+        'trigger'   =>  'media-field-trigger',
+        'title'     => 'media-field-title',
+        'filename'  => 'media-field-filename'
+    );
 
 
     /**
@@ -85,6 +84,10 @@ namespace HaddowG\MetaMaterial;
     public $placeholderImg = null;
 
     public $placeholderImgText = 'Add Media';
+
+    private static $instances = array();
+
+    private $name;
 
     public static function getInstance($name)
     {
@@ -353,11 +356,11 @@ namespace HaddowG\MetaMaterial;
      * @param   string $type
      * @return  string css class(es)
      */
-     public function getClass($type = 'id', $groupname = null)
-     {
-         $groupname = isset($groupname) ? $groupname : $this->groupname ;
-         return $this->classNames[$type] . '-' . $groupname;
-     }
+    public function getClass($type = 'id', $groupname = null)
+    {
+        $groupname = isset($groupname) ? $groupname : $this->groupname ;
+        return $this->classNames[$type] . '-' . $groupname;
+    }
 
     /**
      * Used to insert a WordPress styled button, should be paired with a text
@@ -422,12 +425,12 @@ namespace HaddowG\MetaMaterial;
 
         $file = basename(parse_url($uri, PHP_URL_PATH));
 
-        if ($uri AND in_array($file, array('post.php', 'post-new.php','edit-tags.php')))
+        if ($uri AND in_array($file, array('post.php', 'post-new.php','edit-tags.php','options-general.php')))
         {
             // include javascript for special functionality
             ?>
             <script type="text/javascript">
-            /* <![CDATA[ */
+                /* <![CDATA[ */
                 var img_sizes = jQuery.parseJSON('<?php echo json_encode($this->get_image_sizes()); ?>');
 
                 var getClosestSize = function($targetsize, $attachment){
@@ -439,8 +442,8 @@ namespace HaddowG\MetaMaterial;
                             jQuery.each($attachment.sizes, function($_size, $data){
                                 // already cropped to width or height; so use this size
                                 if ( ( $data['width'] == $targetsize[0] && $data['height'] <= $targetsize[1] ) || ( $data['height'] == $targetsize[1] && $data['width'] <= $targetsize[0] ) ) {
-                                        $found = [$data['url'],$data['width'],$data['height']];
-                                        return false;
+                                    $found = [$data['url'],$data['width'],$data['height']];
+                                    return false;
                                 }
                                 // add to lookup table: area => size
                                 $areas[$data['width'] * $data['height']] = $_size;
@@ -468,7 +471,7 @@ namespace HaddowG\MetaMaterial;
                                         $maybe_cropped = constrainDimensions($attachment.width, $attachment.height, $data['width'], $data['height']);
                                         // If the size doesn't match within one pixel, then it is of a different aspect ratio, so we skip it, unless it's the thumbnail size
                                         if ( 'thumbnail' != $_size && ( !$maybe_cropped || ( $maybe_cropped['width'] != $data['width'] && $maybe_cropped['width'] + 1 != $data['width'] ) || ( $maybe_cropped['height'] != $data['height'] && $maybe_cropped['height'] + 1 != $data['height'] ) ) )
-                                        continue;
+                                            continue;
                                         // If we're still here, then we're going to use this size
                                         $constrained =  constrainDimensions($data['width'],$data['height'],$targetsize[0],$targetsize[1]);
                                         $found = [$data['url'],$constrained['width'],$constrained['height']];
@@ -483,11 +486,11 @@ namespace HaddowG\MetaMaterial;
                             if($attachment.sizes[$targetsize]){
                                 return [$attachment.sizes[$targetsize].url, $attachment.sizes[$targetsize].width,$attachment.sizes[$targetsize].height];
                             }else{
-								if($attachment.sizes.thumbnail){
-									return [$attachment.sizes.thumbnail.url, $attachment.sizes.thumbnail.width,$attachment.sizes.thumbnail.height];
-								}else{
-									return [$attachment.sizes.full.url, $attachment.sizes.full.width,$attachment.sizes.full.height];
-								}
+                                if($attachment.sizes.thumbnail){
+                                    return [$attachment.sizes.thumbnail.url, $attachment.sizes.thumbnail.width,$attachment.sizes.thumbnail.height];
+                                }else{
+                                    return [$attachment.sizes.full.url, $attachment.sizes.full.width,$attachment.sizes.full.height];
+                                }
                             }
                         }
                     }else{
@@ -519,7 +522,7 @@ namespace HaddowG\MetaMaterial;
                     return {'width':w,'height':h}
                 }
 
-            /* ]]> */
+                /* ]]> */
             </script><?php
         }
     }
@@ -537,148 +540,148 @@ namespace HaddowG\MetaMaterial;
 
         $file = basename(parse_url($uri, PHP_URL_PATH));
 
-        if ($uri AND in_array($file, array('post.php', 'post-new.php','edit-tags.php')))
+        if ($uri AND in_array($file, array('post.php', 'post-new.php','edit-tags.php','options-general.php')))
         {
             // include javascript for special functionality
             ?>
             <script type="text/javascript">
-            /* <![CDATA[ */
+                /* <![CDATA[ */
 
-            jQuery(function($)
-            {
-                var media_frame_<?php echo $this->name; ?>;
-                var media_frame_<?php echo $this->name; ?>_trigger;
-
-
-                $(document).on('click','[class*="<?php echo $this->classNames['trigger']; ?>"]', function( event ){
+                jQuery(function($)
+                {
+                    var media_frame_<?php echo $this->name; ?>;
+                    var media_frame_<?php echo $this->name; ?>_trigger;
 
 
-                    event.preventDefault();
+                    $(document).on('click','[class*="<?php echo $this->classNames['trigger']; ?>"]', function( event ){
 
-                    if(typeof wp.Uploader.defaults.filters.mime_types == 'undefined') {
-                        wp.Uploader.defaults.filters.mime_types = [{title:'Allowed Files', extensions: '*'}];
-                    }
 
-                    $modalTitle = jQuery(this).data('modal_title') || '<?php echo $this->modal_title; ?>';
-                    $modalButtonText = jQuery(this).data('modal_button_text') || '<?php echo $this->modal_button_text; ?>';
-                    $fileType = jQuery(this).data('file_type') || '<?php echo $this->file_type; ?>';
-                    $allowedExtensions = jQuery(this).data('allowed_extensions') || '<?php echo $this->allowed_extensions; ?>';
-                    $library = {};
-                    if(jQuery.inArray($fileType,['image','audio','video','text'])>=0){
-                        $library = {
-                            type : $fileType
+                        event.preventDefault();
+
+                        if(typeof wp.Uploader.defaults.filters.mime_types == 'undefined') {
+                            wp.Uploader.defaults.filters.mime_types = [{title:'Allowed Files', extensions: '*'}];
                         }
-                    }else{
-                        if($fileType !='any'){
-                            $mime = $fileType.split('/');
-                            if($mime.length==2){
-                                $library = {
-                                    type : $fileType
+
+                        $modalTitle = jQuery(this).data('modal_title') || '<?php echo $this->modal_title; ?>';
+                        $modalButtonText = jQuery(this).data('modal_button_text') || '<?php echo $this->modal_button_text; ?>';
+                        $fileType = jQuery(this).data('file_type') || '<?php echo $this->file_type; ?>';
+                        $allowedExtensions = jQuery(this).data('allowed_extensions') || '<?php echo $this->allowed_extensions; ?>';
+                        $library = {};
+                        if(jQuery.inArray($fileType,['image','audio','video','text'])>=0){
+                            $library = {
+                                type : $fileType
+                            }
+                        }else{
+                            if($fileType !='any'){
+                                $mime = $fileType.split('/');
+                                if($mime.length==2){
+                                    $library = {
+                                        type : $fileType
+                                    }
                                 }
                             }
                         }
-                    }
 
-                    var default_ext = wp.Uploader.defaults.filters.mime_types[0].extensions;
-                    wp.Uploader.defaults.filters.mime_types[0].extensions = $allowedExtensions;
+                        var default_ext = wp.Uploader.defaults.filters.mime_types[0].extensions;
+                        wp.Uploader.defaults.filters.mime_types[0].extensions = $allowedExtensions;
 
-                    media_frame_<?php echo $this->name; ?>_trigger = this;
+                        media_frame_<?php echo $this->name; ?>_trigger = this;
 
-                    // If the media frame already exists and doesnt need to change, reopen it.
-                    if ( media_frame_<?php echo $this->name; ?> &&  JSON.stringify(media_frame_<?php echo $this->name; ?>.activeLibrary)== JSON.stringify($library) && media_frame_<?php echo $this->name; ?>.activeTitle == $modalTitle && media_frame_<?php echo $this->name; ?>.activeButtonText == $modalButtonText) {
-                    media_frame_<?php echo $this->name; ?>.open();
-                    //choose tab
-                    }else{
+                        // If the media frame already exists and doesnt need to change, reopen it.
+                        if ( media_frame_<?php echo $this->name; ?> &&  JSON.stringify(media_frame_<?php echo $this->name; ?>.activeLibrary)== JSON.stringify($library) && media_frame_<?php echo $this->name; ?>.activeTitle == $modalTitle && media_frame_<?php echo $this->name; ?>.activeButtonText == $modalButtonText) {
+                            media_frame_<?php echo $this->name; ?>.open();
+                            //choose tab
+                        }else{
 
 
-                        // Create the media frame.
-                        media_frame_<?php echo $this->name; ?> = wp.media.frames.media_frame_<?php echo $this->name; ?> = wp.media({
-                        frame: 'select',
-                        library: jQuery.extend({}, $library),
-                        title: $modalTitle,
-                        button: {
-                            text: $modalButtonText
-                        },
-                        multiple: false
-                        });
-                        media_frame_<?php echo $this->name; ?>.activeLibrary = $library;
-                        media_frame_<?php echo $this->name; ?>.activeTitle = $modalTitle;
-                        media_frame_<?php echo $this->name; ?>.activeButtonText = $modalButtonText;
+                            // Create the media frame.
+                            media_frame_<?php echo $this->name; ?> = wp.media.frames.media_frame_<?php echo $this->name; ?> = wp.media({
+                                frame: 'select',
+                                library: jQuery.extend({}, $library),
+                                title: $modalTitle,
+                                button: {
+                                    text: $modalButtonText
+                                },
+                                multiple: false
+                            });
+                            media_frame_<?php echo $this->name; ?>.activeLibrary = $library;
+                            media_frame_<?php echo $this->name; ?>.activeTitle = $modalTitle;
+                            media_frame_<?php echo $this->name; ?>.activeButtonText = $modalButtonText;
 
-                        // When an image is selected, run a callback.
-                        media_frame_<?php echo $this->name; ?>.on( 'select', function() {
-                        // We set multiple to false so only get one image from the uploader
-                        attachment = media_frame_<?php echo $this->name; ?>.state().get('selection').first().toJSON();
-                        console.log(attachment);
-                        //Check File Type
-                        if ( !($fileType == attachment.type || $fileType == attachment.mime ) ){ return };
+                            // When an image is selected, run a callback.
+                            media_frame_<?php echo $this->name; ?>.on( 'select', function() {
+                                // We set multiple to false so only get one image from the uploader
+                                attachment = media_frame_<?php echo $this->name; ?>.state().get('selection').first().toJSON();
+                                console.log(attachment);
+                                //Check File Type
+                                if ( !($fileType == attachment.type || $fileType == attachment.mime ) ){ return };
 
-                        // Do something with attachment here
-                        $name = jQuery(media_frame_<?php echo $this->name; ?>_trigger).attr('class').match(/<?php echo $this->classNames['trigger']; ?>-([a-zA-Z0-9_-]*)/i);
-                        $name = ($name && $name[1]) ? $name[1] : '' ;
-                        var $context = jQuery(media_frame_<?php echo $this->name; ?>_trigger).closest('.postbox, .mm_taxonomybox');
-                        <?php foreach($this->classNames as $key =>$classname){
-                            if($key!='thumb'){
-                        ?>
-                        $field_<?php echo $key; ?> = jQuery('.<?php echo $classname; ?>-'+$name,$context);
-                        $field_<?php echo $key; ?>.each(function(){
-                            var $this = jQuery(this);
-                            <?php
-                            if($key=='url'){
-                            ?>
-                            if($this.is('a')) {
-                                $this.attr('href',attachment.<?php echo $key; ?>);
-                                if($this.hasClass('both')){
+                                // Do something with attachment here
+                                $name = jQuery(media_frame_<?php echo $this->name; ?>_trigger).attr('class').match(/<?php echo $this->classNames['trigger']; ?>-([a-zA-Z0-9_-]*)/i);
+                                $name = ($name && $name[1]) ? $name[1] : '' ;
+                                var $context = jQuery(media_frame_<?php echo $this->name; ?>_trigger).closest('.postbox, .mm_taxonomybox, #wpbody-content');
+                                <?php foreach($this->classNames as $key =>$classname){
+                                    if($key!='thumb'){
+                                ?>
+                                $field_<?php echo $key; ?> = jQuery('.<?php echo $classname; ?>-'+$name,$context);
+                                $field_<?php echo $key; ?>.each(function(){
+                                    var $this = jQuery(this);
+                                    <?php
+                                    if($key=='url'){
+                                    ?>
+                                    if($this.is('a')) {
+                                        $this.attr('href',attachment.<?php echo $key; ?>);
+                                        if($this.hasClass('both')){
+                                            $this.html(attachment.<?php echo $key; ?>);
+                                        }
+                                        return;
+                                    }
+                                    if($this.is('img')) {
+                                        $this.attr('src',attachment.<?php echo $key; ?>);
+                                        return;
+                                    }
+                                    <?php
+                                    }
+                                    ?>
+
+                                    if($this.is('input,textarea,select')){
+                                        $this.val(attachment.<?php echo $key; ?>);
+                                        return;
+                                    }
+
                                     $this.html(attachment.<?php echo $key; ?>);
-                                }
-                                return;
-                            }
-                            if($this.is('img')) {
-                                $this.attr('src',attachment.<?php echo $key; ?>);
-                                return;
-                            }
-                            <?php
-                            }
-                            ?>
 
-                            if($this.is('input,textarea,select')){
-                                $this.val(attachment.<?php echo $key; ?>);
-                                return;
-                            }
+                                });
+                                <?php
+                                    }
+                                 }
+                                ?>
+                                $thumb = jQuery('.<?php echo $this->classNames['thumb']; ?>-'+$name,$context);
+                                $thumb.each(function($i){
+                                    $thumb_size = jQuery(this).data('thumb_size') || 'thumbnail';
+                                    $thumb_data = getClosestSize($thumb_size,attachment);
+                                    jQuery(this).attr('src',$thumb_data[0]);
+                                    jQuery(this).attr('width',$thumb_data[1]);
+                                    jQuery(this).attr('height',$thumb_data[2]);
+                                });
+                                $context.trigger('mm_media', [attachment, $name]);
+                                $context.trigger('mm_media.'+$name, [attachment, $name]);
 
-                            $this.html(attachment.<?php echo $key; ?>);
+                            });
 
-                        });
-                        <?php
-                            }
-                         }
-                        ?>
-                        $thumb = jQuery('.<?php echo $this->classNames['thumb']; ?>-'+$name,$context);
-                        $thumb.each(function($i){
-                            $thumb_size = jQuery(this).data('thumb_size') || 'thumbnail';
-                            $thumb_data = getClosestSize($thumb_size,attachment);
-                            jQuery(this).attr('src',$thumb_data[0]);
-                            jQuery(this).attr('width',$thumb_data[1]);
-                            jQuery(this).attr('height',$thumb_data[2]);
-                        });
-                            $context.trigger('mm_media', [attachment, $name]);
-                            $context.trigger('mm_media.'+$name, [attachment, $name]);
+                            // Finally, open the modal
+                            media_frame_<?php echo $this->name; ?>.open();
 
-                        });
+                        }
 
-                        // Finally, open the modal
-                        media_frame_<?php echo $this->name; ?>.open();
+                        // Reset the allowed file extensions
+                        wp.Uploader.defaults.filters.mime_types[0].extensions = default_ext;
 
-                    }
-
-                     // Reset the allowed file extensions
-                    wp.Uploader.defaults.filters.mime_types[0].extensions = default_ext;
+                    });
 
                 });
 
-            });
-
-            /* ]]> */
+                /* ]]> */
             </script><?php
         }
     }
@@ -693,30 +696,30 @@ namespace HaddowG\MetaMaterial;
         // Create the full array with sizes and crop info
         foreach( $get_intermediate_image_sizes as $_size ) {
 
-                if ( in_array( $_size, array( 'thumbnail', 'medium', 'large' ) ) ) {
+            if ( in_array( $_size, array( 'thumbnail', 'medium', 'large' ) ) ) {
 
-                        $sizes[ $_size ][] = get_option( $_size . '_size_w' );
-                        $sizes[ $_size ][] = get_option( $_size . '_size_h' );
+                $sizes[ $_size ][] = get_option( $_size . '_size_w' );
+                $sizes[ $_size ][] = get_option( $_size . '_size_h' );
 
-                } elseif ( isset( $_wp_additional_image_sizes[ $_size ] ) ) {
+            } elseif ( isset( $_wp_additional_image_sizes[ $_size ] ) ) {
 
-                        $sizes[ $_size ] = array(
-                            $_wp_additional_image_sizes[ $_size ]['width'],
-                            $_wp_additional_image_sizes[ $_size ]['height']
-                        );
+                $sizes[ $_size ] = array(
+                    $_wp_additional_image_sizes[ $_size ]['width'],
+                    $_wp_additional_image_sizes[ $_size ]['height']
+                );
 
-                }
+            }
 
         }
 
         // Get only 1 size if found
         if ( $size ) {
 
-                if( isset( $sizes[ $size ] ) ) {
-                        return $sizes[ $size ];
-                } else {
-                        return false;
-                }
+            if( isset( $sizes[ $size ] ) ) {
+                return $sizes[ $size ];
+            } else {
+                return false;
+            }
 
         }
 
