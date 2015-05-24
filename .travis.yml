@@ -9,12 +9,12 @@ php:
   - 5.5
 
 env:
-  - WP_VERSION=latest WP_MULTISITE=0 WP_TESTS_DIR=/tmp/wordpress-tests-lib
+  - WP_VERSION=latest WP_MULTISITE=0 WP_TESTS_DIR=/tmp/wordpress-tests-lib/includes
 
 matrix:
   include:
     - php: 5.3
-      env: WP_VERSION=latest WP_MULTISITE=1
+      env: WP_VERSION=latest WP_MULTISITE=1 WP_TESTS_DIR=/tmp/wordpress-tests-lib/includes
 
 before_script:
   - bash bin/install-wp-tests.sh wordpress_test root '' localhost $WP_VERSION 
