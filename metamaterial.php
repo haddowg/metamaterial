@@ -9,4 +9,5 @@ if(!class_exists( 'HaddowG\MetaMaterial\Metamaterial' )) {
 
 	\HaddowG\MetaMaterial\Metamaterial::$default_assets_url = plugin_dir_url(__FILE__).'src/haddowg/metamaterial/';
 	\HaddowG\MetaMaterial\Metamaterial::$default_assets_path = plugin_dir_path(__FILE__).'src/haddowg/metamaterial/';
+
 }

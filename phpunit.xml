@@ -6,12 +6,9 @@
 	convertNoticesToExceptions="true"
 	convertWarningsToExceptions="true"
 	>
-    <php>
-        <env name="WP_TESTS_DIR" value="../wordpress-tests-lib/includes" />
-    </php>
 	<testsuites>
 		<testsuite>
-			<directory prefix="test-" suffix=".php">./tests/</directory>
+			<directory prefix="test-" suffix=".php">./tests/unit</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>
