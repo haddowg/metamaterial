@@ -7,7 +7,7 @@
 	convertWarningsToExceptions="true"
 	>
     <php>
-        <env name="WP_TESTS_DIR" value="C:\wamp\www\wpvanilla\wordpress-develop\tests\phpunit" />
+        <env name="WP_TESTS_DIR" value="../../wordpress-tests-lib/" />
     </php>
 	<testsuites>
 		<testsuite>
