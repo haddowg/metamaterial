@@ -2543,7 +2543,7 @@ abstract class Metamaterial
      */
     final public static function purgeInstances(){
 
-        self::$instances = [];
+        self::$instances = array();
 
     }
 }
