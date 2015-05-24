@@ -11,6 +11,9 @@ php:
 env:
   - WP_VERSION=latest WP_MULTISITE=0 WP_TESTS_DIR=/tmp/wordpress-tests-lib/includes
 
+install:
+   - composer require php/$TRAVIS_PHP_VERSION
+
 matrix:
   include:
     - php: 5.3
