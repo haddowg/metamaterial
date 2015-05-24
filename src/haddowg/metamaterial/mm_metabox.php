@@ -538,10 +538,10 @@ class MM_Metabox extends Metamaterial
         'page_attributes'=> '#pageparentdiv, #screen-meta label[for="pageparentdiv-hide"] {display: none;}' );
 
     /**
-     * Private MetaMaterial Constructor
+     * Protected MetaMaterial Constructor
      *
      * @since   0.1
-     * @access  private
+     * @access  protected
      * @param   string  $id Unique id for this MetaMaterial instance
      * @param   array   $config Configuration options for this instance, see individual option documentation
      */

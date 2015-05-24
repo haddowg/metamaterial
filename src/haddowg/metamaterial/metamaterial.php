@@ -376,6 +376,9 @@ abstract class Metamaterial
 	 */
     private static $instances =array();
 
+
+    private static $registeredDependencies = array();
+
     /**
 	 * Cached value of can_output(), to prevent re-execution.
 	 *
@@ -549,88 +552,170 @@ abstract class Metamaterial
 	 */
 	protected static $hide_on_screen_styles = array();
 
+
+    protected function construct($id, $config = array())
+    {
+        if(get_called_class()==='HaddowG\Metamaterial\Metamaterial'){
+            throw new MM_Exception('Attempt to instantiate Abstract MetaMaterial Class',500);
+        }
+
+        if (is_array($config)) {
+
+            $config_defaults = array
+            (
+                'title' => $this->title,
+                'template' => $this->template,
+                'context' => $this->context,
+                'priority' => $this->priority,
+                'ajax_save' => $this->ajax_save,
+                'mode' => $this->mode,
+                'meta_key' => '_' . $id,
+                'prefix' => $this->prefix,
+                'hide_on_screen' => $this->hide_on_screen,
+                'init_action' => $this->init_action,
+                'output_filter' => $this->output_filter,
+                'save_filter' => $this->save_filter,
+                'save_action' => $this->save_action,
+                'head_action' => $this->head_action,
+                'foot_action' => $this->foot_action
+            );
+
+
+            //discard non config options and merge with defaults
+            $conf = array_merge($config_defaults, array_intersect_key($config, $config_defaults));
+
+            //set instance config options
+            foreach ($conf as $n => $v) {
+                $this->$n = $v;
+            }
+
+            if (isset($config['compound_hide'])) {
+                self::$compound_hide = $config['compound_hide'];
+            }
+        }else{
+            throw new MM_Exception('provided config was not a valid array',500);
+        }
+    }
+
     /**
      * Return or create instance of MetaMaterial.
      * If Instance with this $id exists it will be returned.
-     * if config was also passed when an instance already exists it will be ignored and a non-fatal warning generated.
-     * If no existing instance exists wit this id it will be constructed with the provided $config.
+     * If no existing instance exists with this id it will be constructed with the provided $config.
+     *
+     * If config was passed when an instance already exists for the provided $id an exception will be thrown.
      *
      * @since   0.1
      * @access  public
      *
-*@param   string $id Unique id for this MetaMaterial instance
+     * @param   string $id Unique id for this MetaMaterial instance
      * @param   array $config Configuration options for this instance, see individual option documentation
      * @param   Metamaterial|string $type optional class name or object of class extending Metamaterial.
-     *
-*@return  Metamaterial new or existing instance of MetaMaterial
-     * @see    __construct()
+     * @return  Metamaterial new or existing instance of MetaMaterial
+     * @throws  MM_Exception
+     * @see     __construct()
      */
-	final public static function getInstance($id, $config = array(),$type=NULL)
+	final public static function getInstance($id, $config = array(),$class=NULL)
     {
 
-        if(empty($type) || (!is_subclass_of($type, 'HaddowG\MetaMaterial\Metamaterial'))){
-            $type = get_called_class();
+        if(empty($class) || (!is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial'))){
+            $class = get_called_class();
         }
 
-        if(is_subclass_of($type, 'HaddowG\MetaMaterial\Metamaterial')){
-            if(is_object($type)){
-                $type = get_class($type);
+        if(is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial')){
+            if(is_object($class)){
+                $class = get_class($class);
             }
-        // ensure type array exists
-        if(!array_key_exists($type, self::$instances)){
-            self::$instances[$type] = array();
-        }
-        // Check if an instance exists with this key already
-        if (!array_key_exists($id, self::$instances[$type])) {
-            // instance doesn't exist yet, so create it
-            self::$instances[$type][$id] = new $type($id, $config);
-            $newInst = self::$instances[$type][$id];
-            /** @var $newInst Metamaterial */
-            //init data
-            $newInst->id = $id;
-            $newInst->loop_data = new stdClass();
 
-            //check minimum requirements
-            //check valid id
-            if (empty($newInst->id)) die('Metabox id required');
-            if (is_numeric($newInst->id)) die('Metabox id must be a string');
+            $resolved = self::resolveDependancy($class);
 
-            //check valid template
-            if (empty($newInst->template)) die('Metabox template file required');
-            //if the template is not found
-            if(!file_exists($newInst->template)){
-                //try relative to the default /metabox/ directory in the theme folder
-                if(file_exists(get_stylesheet_directory() . '/metaboxes/' . $newInst->template)){
-                    $newInst->template = get_stylesheet_directory() . '/metaboxes/' . $newInst->template;
-                }else{
-                    die('Unable to locate Metabox template');
+            // ensure type array exists
+            if(!array_key_exists($class, self::$instances)){
+                self::$instances[$class] = array();
+            }
+            // Check if an instance exists with this key already
+            if (!array_key_exists($id, self::$instances[$class])) {
+
+                // instance doesn't exist yet, so create it
+                if(is_callable($resolved)){
+                    self::$instances[$class][$id] = $resolved($id, $config);
+                }else {
+                    self::$instances[$class][$id] = new $resolved($id, $config);
+                }
+                $newInst = self::$instances[$class][$id];
+                /** @var $newInst Metamaterial */
+                //init data
+                $newInst->id = $id;
+                $newInst->loop_data = new stdClass();
+
+                //check minimum requirements
+                //check valid id
+                if (empty($newInst->id)) throw new MM_Exception('Metabox id required',500);
+                if (is_numeric($newInst->id)) throw new MM_Exception('Metabox id must be a non numeric string',500);
+
+                //check valid template
+                if (empty($newInst->template)) throw new MM_Exception('Metabox template file required',500);
+                //if the template is not found
+                if(!file_exists($newInst->template)){
+                    //try relative to the default /metabox/ directory in the theme folder
+                    if(file_exists(get_stylesheet_directory() . '/metaboxes/' . $newInst->template)){
+                        $newInst->template = get_stylesheet_directory() . '/metaboxes/' . $newInst->template;
+                    }else{
+                        throw new MM_Exception('Unable to locate Metabox template',500);
+                    }
+                }
+
+                $newInst->initInstanceActions();
+
+            } else {
+                if (!empty($config)) {
+                    throw new MM_Exception('Attempted to pass config to existing instance of MetaMaterial',500);
                 }
             }
-
-            //these are added only once, the first time a MetaMaterial is constructed, therefore they run only once for all instances.
-            $newInst->add_action('admin_head', 'HaddowG\MetaMaterial\MM_Base::global_head', 10, 1, FALSE, FALSE);
-            $newInst->add_action('admin_footer', 'HaddowG\MetaMaterial\MM_Base::global_foot', 10, 1, FALSE, FALSE);
-            //register output filters on 'admin_init' so they are available before global_init() runs on the 'current_screen' hook.
-            add_action('admin_init', array($newInst,'prep'));
-            //this is added only once the fisrt tie a MetaMaterial is constructed, therefore runs only once for all instances.
-            $newInst->add_action('current_screen', 'HaddowG\MetaMaterial\MM_Base::global_init',10,1,FALSE,FALSE);
-            //header and footer actions will be fired only for target admin pages
-            $newInst->add_action('admin_head', array($newInst, 'head'), 11, 1, FALSE, TRUE);
-            $newInst->add_action('admin_footer', array($newInst,'foot'), 11, 1, FALSE, TRUE);
-            if($newInst->ajax_save){
-                add_action('wp_ajax_' . $newInst->get_action_tag('ajax_save'), array($newInst, 'ajax_save'));
-            }
-        } else {
-			//throw warning
-            if (!empty($config)) {
-                trigger_error('Attempted to pass config to existing instance of MetaMaterial, config was ignored!',E_USER_WARNING);
-            }
-        }
-        // Return the correct instance of this class
-        return self::$instances[$type][$id];
+            // Return the correct instance of this class
+            return self::$instances[$class][$id];
 
         }else{
-            die('Attempt to instantiate non Metamaterial Class or Abstract MetaMaterial Class.');
+            throw new MM_Exception('Attempt to instantiate non Metamaterial Class or Abstract MetaMaterial Class.',500);
+
+        }
+    }
+
+    final public static function hasInstance($id,$type){
+        // ensure type array exists
+        return (array_key_exists($type, self::$instances)) && array_key_exists($id, self::$instances[$type]);
+    }
+
+
+    final public static function resolveDependancy($classname){
+
+        if(!in_array($classname,array_keys(self::$registeredDependencies))){
+            $registeredTypes[$classname] = $classname;
+        }
+        return self::$registeredDependencies[$classname];
+
+    }
+
+    public static function registerDependancy($classname,$resolution){
+        self::$registeredDependencies[$classname] = $resolution;
+    }
+
+    public function initInstanceActions(){
+
+        //these are added only once, the first time a MetaMaterial is constructed, therefore they run only once for all instances.
+        $this->add_action('admin_head', 'HaddowG\MetaMaterial\MM_Base::global_head', 10, 1, FALSE, FALSE);
+        $this->add_action('admin_footer', 'HaddowG\MetaMaterial\MM_Base::global_foot', 10, 1, FALSE, FALSE);
+
+        //register output filters on 'admin_init' so they are available before global_init() runs on the 'current_screen' hook.
+        add_action('admin_init', array($this,'prep'));
+
+        //this is added only once the first time a MetaMaterial is constructed, therefore runs only once for all instances.
+        $this->add_action('current_screen', 'HaddowG\MetaMaterial\MM_Base::global_init',10,1,FALSE,FALSE);
+
+        //header and footer actions will be fired only for target admin pages
+        $this->add_action('admin_head', array($this, 'head'), 11, 1, FALSE, TRUE);
+        $this->add_action('admin_footer', array($this,'foot'), 11, 1, FALSE, TRUE);
+        if($this->ajax_save){
+            add_action('wp_ajax_' . $this->get_action_tag('ajax_save'), array($this, 'ajax_save'));
         }
     }
 
@@ -1221,17 +1306,23 @@ abstract class Metamaterial
 	 */
 	private static function get_global_styles()
     {
-        $styles ='';
+        $styles = array();
         foreach(self::$instances as $inst){
             /** @var $inst Metamaterial[] */
             if(!empty($inst)){
-                $styles .= reset($inst)->get_global_style();
+                $styles= array_merge($styles, reset($inst)->get_global_style());
             }
         }
-        if(!empty($styles)){
-            return '<style type="text/css" id="metamaterial_global_style">' . apply_filters('metamaterial_filter_global_styles',$styles) . '</style>';
-        }else{
-            return '';
+        return apply_filters('metamaterial_filter_global_styles',$styles);
+
+    }
+
+    private static function print_global_styles(){
+        $styles = self::get_global_styles();
+        if(!empty($styles) && is_array($styles)){
+        ?>
+            <style type="text/css" id="metamaterial_global_style"><?php echo implode("\r\n",$styles); ?></style>
+        <?php
         }
     }
 
@@ -1267,11 +1358,14 @@ abstract class Metamaterial
 			var METAMATERIAL = {};
 		</script>
 		<?php
-		foreach(static::get_global_scripts() as $script){
-		?>
-		<script type="text/javascript" src="<?php echo $script ?>"></script>
-		<?php
-		}
+        $scripts = self::get_global_scripts();
+        if(!empty($scripts) && is_array($scripts)) {
+            foreach ($scripts as $script) {
+            ?>
+            <script type="text/javascript" src="<?php echo $script ?>"></script>
+            <?php
+            }
+        }
 	}
 
 	/**
@@ -1313,7 +1407,7 @@ abstract class Metamaterial
 		if (!self::is_target_admin()) {
 			return false;
 		}
-		$script = $this->get_assets_url() . $this->get_global_script_name();
+		$script = $this->get_asset_url($this->get_global_script_name());
 		if(file_exists($script)){
 			return $script;
 		}else{
@@ -1374,8 +1468,7 @@ abstract class Metamaterial
 	 */
 	static function global_head()
 	{
-        echo self::get_global_styles();
-
+        self::print_global_styles();
 		self::print_global_scripts();
 	}
 
@@ -2434,14 +2527,23 @@ abstract class Metamaterial
 	/**
 	 *
 	 */
-	public static function dumpInstances(){
+	public static function logInstances(){
 
-            foreach(self::$instances as $k => $v){
-                error_log($k);
-                foreach($v as $mm){
-                    error_log('     ' . get_class($mm));
-                }
+        foreach(self::$instances as $k => $v){
+            error_log($k);
+            foreach($v as $mm){
+                error_log('     ' . get_class($mm));
             }
-
         }
+
+    }
+
+    /**
+     *
+     */
+    final public static function purgeInstances(){
+
+        self::$instances = [];
+
+    }
 }
