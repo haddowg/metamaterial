@@ -9,7 +9,7 @@ php:
   - 5.5
 
 env:
-  - WP_VERSION=latest WP_MULTISITE=0 WP_TESTS_DIR=/tmp/wordpress-tests-lib/includes
+  - WP_VERSION=latest WP_MULTISITE=0 WP_TESTS_DIR=/tmp/wordpress-tests-lib
 
 matrix:
   include:
