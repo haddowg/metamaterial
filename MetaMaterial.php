@@ -3,6 +3,7 @@
 if(!class_exists( 'HaddowG\MetaMaterial\Metamaterial' )) {
 	spl_autoload_register(
 		function ( $pClassName ) {
+            var_dump('src/' . strtolower( str_replace( "\\", "/", $pClassName ) ));
 			spl_autoload( 'src/' . strtolower( str_replace( "\\", "/", $pClassName ) ));
 		}
 	);
