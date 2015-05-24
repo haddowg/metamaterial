@@ -31,7 +31,7 @@ namespace HaddowG\MetaMaterial;
 
 use stdClass;
 
-class MM_Metabox extends MetaMaterial
+class MM_User extends Metamaterial
 {
     /**
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
@@ -39,44 +39,11 @@ class MM_Metabox extends MetaMaterial
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
      */
 
-    /** view option */
-    const VIEW_OPEN = 'open';
-
-    /** view option */
-    const VIEW_CLOSED = 'closed';
-
-    /** view option */
-    const VIEW_ALWAYS_OPEN = 'always_open';
-
     /**
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
      *  CONFIGURABLE OPTIONS/VALUES
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
      */
-
-    /**
-     * Used to set the post types that this metabox can appear in.
-     * Defaults to 'post' and 'page' types, to add your metabox to custom post types you must define the types option.
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		array an array of post types that this metabox can appear on.
-     */
-    private $types = array('post', 'page');
-
-    /**
-     * Whether to save this metaboxes data on autosave.
-     * Defaults to TRUE.
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		bool Whether to save this metaboxes data on autosave.
-     */
-    private $autosave = TRUE;
 
     /**
      * Used to hide the meta box title.
@@ -93,45 +60,6 @@ class MM_Metabox extends MetaMaterial
     private $hide_title = FALSE;
 
     /**
-     * Used to prevent dragging of a metabox.
-     * Note it is still possible to reorder metaboxes by dragging unlocked boxes above or below a locked metabox.
-     * The "postbox" container for the metabox will have the "locked" class applied.
-     *
-     * Config Option
-     *
-     * @access	private
-     * @var		boolean Whether to prevent
-     */
-    private $lock = FALSE;
-
-    /**
-     * Used to set the initial view state of the metabox.
-     * possible values are:
-     * VIEW_OPEN, VIEW_CLOSED, VIEW_ALWAYS_OPEN
-     * If VIEW_ALWAYS_OPEN the "postbox" container for the metabox will have the "open" class applied.
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string possible values are: VIEW_OPEN, VIEW_CLOSED, VIEW_ALWAYS_OPEN
-     * @see     VIEW_OPEN, VIEW_CLOSED, VIEW_ALWAYS_OPEN
-     */
-    private $view;
-
-    /**
-     * Used to hide the show/hide checkbox option from the screen options area.
-     * The "postbox" container for the metabox will have the "hide-screen-option" class applied.
-     *
-     * Config Option
-     *
-     * @since   0.1
-     * @access  private
-     * @var		boolean
-     */
-    private $hide_screen_option = FALSE;
-
-    /**
      * Used to add additional classes to this metaboxes postbox.
      *
      * Config Option
@@ -142,40 +70,25 @@ class MM_Metabox extends MetaMaterial
      */
     private $postbox_classes;
 
+
     /**
-     * Exclude any post object that uses any of these page templates.
+     * Exclude any users belonging to one or more role(s).
      *
      * Value can be provided as:
-     * a single string value  - 'my_template.php'
-     * a string of comma separated values - 'my_template.php,my_other_template.php'
-     * an array of values - array('my_template.php','my_other_template.php')
+     * a single string value  - 'administrator'
+     * a string of comma separated values - 'administrator,editor'
+     * an array of values - array('administrator','editor')
      *
      * Config Option
      *
      * @since	0.1
      * @access	private
-     * @var		string|array Exclude any post object that uses any of these page templates
+     * @var		string|array Exclude any users belonging to these role(s)
      */
-    private $exclude_template;
+    private $exclude_role;
 
     /**
-     * Exclude any post object that is one of these post formats.
-     *
-     * Value can be provided as:
-     * a single string value  - 'gallery'
-     * a string of comma separated values - 'gallery,image'
-     * an array of values - array('gallery','image')
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Exclude any post object that is one of these post formats
-     */
-    private $exclude_post_format;
-
-    /**
-     * Exclude any post object that belongs to any of these categories.
+     * Exclude these user id(s).
      *
      * Value can be provided as:
      * a single string value  - '12'
@@ -186,29 +99,28 @@ class MM_Metabox extends MetaMaterial
      *
      * @since	0.1
      * @access	private
-     * @var		string|array Exclude any post object that belongs to one of these categories
+     * @var		string|array Exclude any user with these user id(s)
      */
-    private $exclude_category_id;
+    private $exclude_user_id;
 
     /**
-     * Exclude any post object that belongs to any of these categories.
-     * This will match slugs or category names
+     * Include any users belonging to one or more role(s).
      *
      * Value can be provided as:
-     * a single string value  - 'blog'
-     * a string of comma separated values - 'blog,portfolio'
-     * an array of values - array('Blog','My Portfolio')
+     * a single string value  - 'administrator'
+     * a string of comma separated values - 'administrator,editor'
+     * an array of values - array('administrator','editor')
      *
      * Config Option
      *
      * @since	0.1
      * @access	private
-     * @var		string|array Exclude any post object that belongs to one of these categories
+     * @var		string|array Include any users belonging to these role(s)
      */
-    private $exclude_category;
+    private $include_role;
 
     /**
-     * Exclude any post object that belongs to any of these post tags.
+     * Include these user id(s).
      *
      * Value can be provided as:
      * a single string value  - '12'
@@ -219,222 +131,9 @@ class MM_Metabox extends MetaMaterial
      *
      * @since	0.1
      * @access	private
-     * @var		string|array Exclude any post object that belongs to one of these post tags
+     * @var		string|array Include these user id(s)
      */
-    private $exclude_tag_id;
-
-    /**
-     * Exclude any post object that belongs to any of these post tags.
-     * This will match slugs or category names
-     *
-     * Value can be provided as:
-     * a single string value  - 'boring'
-     * a string of comma separated values - 'boring,interesting'
-     * an array of values - array('Boring','Interesting Stuff')
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Exclude any post object that belongs to one of these post tags
-     */
-    private $exclude_tag;
-
-    /**
-     * Exclude any post object that belongs to any of these taxonomy terms.
-     * This is a lot broader than $exclude_category_id or $exclude_tag_id and will consider all taxonomies.
-     * Note: this uses term id's and not taxonomy term id's
-     *
-     * Value can be provided as:
-     * a single string value  - '12'
-     * a string of comma separated values - '12,34'
-     * an array of values - array(12,34)
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Exclude any post object that belongs to one of these taxonomy terms
-     */
-    private $exclude_taxonomy_id;
-
-    /**
-     * Exclude any post object that belongs to any of these taxonomy terms.
-     * This is a lot broader than $exclude_category or $exclude_tag and will consider all taxonomies.
-     *
-     * Value can be provided as:
-     * a single string value  - 'boring'
-     * a string of comma separated values - 'boring,interesting'
-     * an array of values - array('Boring','Interesting Stuff')
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Exclude any post object that belongs to one of these taxonomy terms
-     */
-    private $exclude_taxonomy;
-
-    /**
-     * Exclude these post id(s).
-     *
-     * Value can be provided as:
-     * a single string value  - '12'
-     * a string of comma separated values - '12,34'
-     * an array of values - array(12,34)
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Exclude any post object wth these id(s)
-     */
-    private $exclude_post_id;
-
-    /**
-     * Include any post object that uses any of these page templates.
-     *
-     * Value can be provided as:
-     * a single string value  - 'my_template.php'
-     * a string of comma separated values - 'my_template.php,my_other_template.php'
-     * an array of values - array('my_template.php','my_other_template.php')
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that uses any of these page templates
-     */
-    private $include_template;
-
-    /**
-     * Include any post object that is one of these post formats.
-     *
-     * Value can be provided as:
-     * a single string value  - 'gallery'
-     * a string of comma separated values - 'gallery,image'
-     * an array of values - array('gallery','image')
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that is one of these post formats
-     */
-    private $include_post_format;
-
-    /**
-     * Include any post object that belongs to any of these categories.
-     *
-     * Value can be provided as:
-     * a single string value  - '12'
-     * a string of comma separated values - '12,34'
-     * an array of values - array(12,34)
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that belongs to one of these categories
-     */
-    private $include_category_id;
-
-    /**
-     * Include any post object that belongs to any of these categories.
-     * This will match slugs or category names
-     *
-     * Value can be provided as:
-     * a single string value  - 'blog'
-     * a string of comma separated values - 'blog,portfolio'
-     * an array of values - array('Blog','My Portfolio')
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that belongs to one of these categories
-     */
-    private $include_category;
-
-    /**
-     * Include any post object that belongs to any of these post tags.
-     *
-     * Value can be provided as:
-     * a single string value  - '12'
-     * a string of comma separated values - '12,34'
-     * an array of values - array(12,34)
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that belongs to one of these post tags
-     */
-    private $include_tag_id;
-
-    /**
-     * Include any post object that belongs to any of these post tags.
-     * This will match slugs or category names
-     *
-     * Value can be provided as:
-     * a single string value  - 'boring'
-     * a string of comma separated values - 'boring,interesting'
-     * an array of values - array('Boring','Interesting Stuff')
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that belongs to one of these post tags
-     */
-    private $include_tag;
-
-    /**
-     * Include any post object that belongs to any of these taxonomy terms.
-     * This is a lot broader than $exclude_category_id or $exclude_tag_id and will consider all taxonomies.
-     * Note: this uses term id's and not taxonomy term id's
-     *
-     * Value can be provided as:
-     * a single string value  - '12'
-     * a string of comma separated values - '12,34'
-     * an array of values - array(12,34)
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that belongs to one of these taxonomy terms
-     */
-    private $include_taxonomy_id;
-
-    /**
-     * Include any post object that belongs to any of these taxonomy terms.
-     * This is a lot broader than $exclude_category or $exclude_tag and will consider all taxonomies.
-     *
-     * Value can be provided as:
-     * a single string value  - 'boring'
-     * a string of comma separated values - 'boring,interesting'
-     * an array of values - array('Boring','Interesting Stuff')
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that belongs to one of these taxonomy terms
-     */
-    private $include_taxonomy;
-
-    /**
-     * Include these post id's.
-     *
-     * Value can be provided as:
-     * a single string value  - '12'
-     * a string of comma separated values - '12,34'
-     * an array of values - array(12,34)
-     *
-     * Config Option
-     *
-     * @since	0.1
-     * @access	private
-     * @var		string|array Include any post object that belongs to one of these taxonomy terms
-     */
-    private $include_post_id;
+    private $include_user_id;
 
     /**
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
@@ -450,18 +149,7 @@ class MM_Metabox extends MetaMaterial
      * @var     string current post id being used for meta retrieval
      * @see     meta()
      */
-    private $meta_post_id;
-
-    /**
-     * Current post data cache for can_output() use.
-     * Could be used in templates to avoid re-retrieval.
-     *
-     * @since   0.1
-     * @access  protected
-     * @var     stdClass Current post data cache
-     * @see     can_output()
-     */
-    protected static $current_post = null;
+    private $meta_user_id;
 
     /**
      * Array of admin page targets on which this MetaMaterial Class is designed to display.
@@ -471,7 +159,7 @@ class MM_Metabox extends MetaMaterial
      * @var     array Array of admin page targets on which this MetaMaterial Class is designed to display
      * @see     is_target_admin()
      */
-    protected static $admin_targets = array('post.php','post-new.php');
+    protected static $admin_targets = array('user-edit.php','user-new.php','profile.php','wp-login.php');
 
 
     /**
@@ -503,12 +191,20 @@ class MM_Metabox extends MetaMaterial
      * @see     is_target_admin()
      */
     protected static $contexts = array(
-        'before_title',
-        'after_title',
-        'after_editor',
-        'normal',
-        'advanced',
-        'side');
+        'before_personal_table',
+        'personal_table_top',
+        'personal_table_bottom',
+        'before_name_table',
+        'name_table_top',
+        'name_table_bottom',
+        'before_contact_table',
+        'contact_table_top',
+        'contact_table_bottom',
+        'before_about_table',
+        'about_table_top',
+        'about_table_bottom',
+        'normal'
+    );
 
     /**
      * Array of CSS rules used to hide default screen elements.
@@ -519,23 +215,7 @@ class MM_Metabox extends MetaMaterial
      * @var     array Array of CSS rules used to hide default screen elements.
      * @see     get_global_style(), $hide_on_screen, $compound_hide
      */
-    protected static $hide_on_screen_styles = array(
-        'permalink'     =>  '#edit-slug-box {display: none;}',
-        'the_content'   =>  '#postdivrich {display: none;}',
-        'editor'        =>  '#postdivrich {display: none;}',
-        'excerpt'       =>  '#postexcerpt, #screen-meta label[for="postexcerpt-hide"] {display: none;}',
-        'custom_fields' =>  '#postcustom, #screen-meta label[for="postcustom-hide"] { display: none; }',
-        'discussion'    =>  '#commentstatusdiv, #screen-meta label[for="commentstatusdiv-hide"] {display: none;}',
-        'comments'      =>  '#commentsdiv, #screen-meta label[for="commentsdiv-hide"] {display: none;}',
-        'slug'          =>  '#slugdiv, #screen-meta label[for="slugdiv-hide"] {display: none;}',
-        'author'        =>  '#authordiv, #screen-meta label[for="authordiv-hide"] {display: none;}',
-        'format'        =>  '#formatdiv, #screen-meta label[for="formatdiv-hide"] {display: none;}',
-        'featured_image'=>  '#postimagediv, #screen-meta label[for="postimagediv-hide"] {display: none;}',
-        'revisions'     =>  '#revisionsdiv, #screen-meta label[for="revisionsdiv-hide"] {display: none;}',
-        'categories'    =>  '#categorydiv, #screen-meta label[for="categorydiv-hide"] {display: none;}',
-        'tags'          =>  '#tagsdiv-post_tag, #screen-meta label[for="tagsdiv-post_tag-hide"] {display: none;}',
-        'send-trackbacks'=> '#trackbacksdiv, #screen-meta label[for="trackbacksdiv-hide"] {display: none;}' ,
-        'page_attributes'=> '#pageparentdiv, #screen-meta label[for="pageparentdiv-hide"] {display: none;}' );
+    protected static $hide_on_screen_styles = array();
 
     /**
      * Private MetaMaterial Constructor
@@ -554,38 +234,19 @@ class MM_Metabox extends MetaMaterial
             (
                 'title'                 =>  $this->title,
                 'template'              =>  $this->template,
-                'types'                 =>  $this->types,
                 'context'               =>  $this->context,
                 'priority'              =>  $this->priority,
-                'autosave'              =>  $this->autosave,
                 'ajax_save'             =>  $this->ajax_save,
                 'mode'                  =>  $this->mode,
                 'meta_key'              =>  '_' . $id,
                 'prefix'                =>  $this->prefix,
                 'hide_on_screen'        =>  $this->hide_on_screen,
                 'hide_title'            =>  $this->hide_title,
-                'lock'                  =>  $this->lock,
-                'view'                  =>  $this->view,
-                'hide_screen_option'    =>  $this->hide_screen_option,
                 'postbox_classes'		=>	$this->postbox_classes,
-                'exclude_template'      =>  $this->exclude_template,
-                'exclude_post_format'   =>  $this->exclude_post_format,
-                'exclude_category_id'   =>  $this->exclude_category_id,
-                'exclude_category'      =>  $this->exclude_category,
-                'exclude_tag_id'        =>  $this->exclude_tag_id,
-                'exclude_tag'           =>  $this->exclude_tag,
-                'exclude_taxonomy_id'   =>  $this->exclude_taxonomy_id,
-                'exclude_taxonomy'      =>  $this->exclude_taxonomy,
-                'exclude_post_id'       =>  $this->exclude_post_id,
-                'include_template'      =>  $this->include_template,
-                'include_post_format'   =>  $this->include_post_format,
-                'include_category_id'   =>  $this->include_category_id,
-                'include_category'      =>  $this->include_category,
-                'include_tag_id'        =>  $this->include_tag_id,
-                'include_tag'           =>  $this->include_tag,
-                'include_taxonomy_id'   =>  $this->include_taxonomy_id,
-                'include_taxonomy'      =>  $this->include_taxonomy,
-                'include_post_id'       =>  $this->include_post_id,
+                'exclude_role'      =>  $this->exclude_role,
+                'exclude_user_id'   =>  $this->exclude_user_id,
+                'include_role'      =>  $this->include_role,
+                'include_user_id'   =>  $this->include_user_id,
                 'init_action'           =>  $this->init_action,
                 'output_filter'         =>  $this->output_filter,
                 'save_filter'           =>  $this->save_filter,
@@ -603,36 +264,15 @@ class MM_Metabox extends MetaMaterial
                 $this->$n = $v;
             }
 
-            if(isset($config['compound_hide'])){
-                self::$compound_hide = $config['compound_hide'];
-            }
-
             // convert non-array values
             $prep_arrays = array
             (
-                'types',
+                'exclude_role',
+                'exclude_user_id',
 
-                'exclude_template',
-                'exclude_post_format',
-                'exclude_category_id',
-                'exclude_category',
-                'exclude_tag_id',
-                'exclude_tag',
-                'exclude_taxonomy_id',
-                'exclude_taxonomy',
-                'exclude_post_id',
+                'include_role',
+                'include_user_id',
 
-                'include_template',
-                'include_post_format',
-                'include_category_id',
-                'include_category',
-                'include_tag_id',
-                'include_tag',
-                'include_taxonomy_id',
-                'include_taxonomy',
-                'include_post_id',
-
-                'hide_on_screen',
                 'postbox_classes'
             );
 
@@ -653,42 +293,6 @@ class MM_Metabox extends MetaMaterial
     }
 
     /**
-     * Creates the before_title and after_title context sections and outputs the respective metaboxes.
-     * The before_title section is moved by javascript on page load as there is no way of inserting above the title natively.
-     * Runs of the edit_form_after_title wordpress hook.
-     *
-     * @since   0.1
-     * @access  public
-     * @see		global_init()
-     */
-    public static function edit_form_after_title()
-    {
-        global $post, $typenow, $wp_meta_boxes;
-        do_meta_boxes( $typenow, 'before_title', $post);
-        do_meta_boxes( $typenow, 'after_title', $post);
-
-        unset( $wp_meta_boxes[$typenow]['before_title'] );
-        unset( $wp_meta_boxes[$typenow]['after_title'] );
-    }
-
-    /**
-     * Creates the after_editor context section and outputs the respective metaboxes.
-     * Runs of the edit_form_after_editor wordpress hook.
-     *
-     * @since   0.1
-     * @access  public
-     * @see		global_init()
-     */
-    public static function edit_form_after_editor()
-    {
-        global $post, $typenow, $wp_meta_boxes;
-
-        do_meta_boxes( $typenow, 'after_editor', $post);
-
-        unset( $wp_meta_boxes[$typenow]['after_editor'] );
-    }
-
-    /**
      * Filters this metaboxes postbox classes.
      * Runs of the 'postbox_classes_{page}_{id}' wordpress hook to affect this metabox only.
      * Classes are added  or removed that are used to trigger javascript and target CSS for the behaviour of
@@ -703,30 +307,7 @@ class MM_Metabox extends MetaMaterial
      */
     public function add_postbox_classes($classes){
 
-		$classes[] = 'mm_postbox';
-		
-        if($this->view == self::VIEW_ALWAYS_OPEN || $this->view == self::VIEW_OPEN){
-            if(($key = array_search('closed', $classes)) !== FALSE) {
-                unset($classes[$key]);
-            }
-        }
-
-        if($this->hide_screen_option){
-            $classes[] = 'hide-screen-option';
-        }
-
-        if($this->view == self::VIEW_ALWAYS_OPEN){
-            $classes[] = 'open';
-        }
-
-        if($this->lock){
-            $classes[] = 'locked';
-        }
-
-        if($this->hide_title){
-            $classes[] = 'headless';
-        }
-
+		$classes[] = 'mm_userbox';
 
         if($this->postbox_classes && is_array($this->postbox_classes) && !empty($this->postbox_classes)){
             $classes = array_merge($classes, $this->postbox_classes);
@@ -748,20 +329,24 @@ class MM_Metabox extends MetaMaterial
         }
 
         //add the metabox
-        add_meta_box($this->id . '_metamaterial', $this->get_title(), array($this, 'render'), $typenow, $this->get_context(), $this->get_priority(FALSE,TRUE));
-
-        //add postbox classes
-        add_filter('postbox_classes_' . $typenow . '_' . $this->id . '_metamaterial', array($this,'add_postbox_classes'));
+        add_action( 'show_user_profile', array($this, 'render') );
+        add_action( 'edit_user_profile', array($this, 'render') );
 
         //make it save
-        add_action('save_post', array($this,'save'));
+        add_action('personal_options_update', array($this,'save'));
+        add_action('edit_user_profile_update', array($this,'save'));
     }
 
     protected function init_once(){
-        // Allow 'before_title' and 'after_title' contexts
-        add_action('edit_form_after_title', 'HaddowG\MetaMaterial\MM_Metabox::edit_form_after_title');
-        // Allow 'after_editor' context
-        add_action('edit_form_after_editor', 'HaddowG\MetaMaterial\MM_Metabox::edit_form_after_editor');
+        add_filter( 'admin_body_class', 'HaddowG\MetaMaterial\MM_User::add_user_body_classes' );
+    }
+
+    public static function add_user_body_classes($classes){
+        $classes = explode(' ',$classes);
+
+        $classes[] = 'has_metamaterial';
+
+        return implode(' ',$classes);
     }
 
     /**
@@ -797,54 +382,22 @@ class MM_Metabox extends MetaMaterial
     }
 
     /**
-     * Used to check for the current post type, works when creating or editing a
-     * new post, page or custom post type.
-     *
-     * @static
-     * @since	0.1
-     * @return	string [custom_post_type], page or post
-     */
-    static function get_current_post_type()
-    {
-        global $typenow;
-
-        // when editing pages, $typenow isn't set until later!
-        if (empty($typenow)) {
-            // try to pick it up from the query string
-            if (!empty($_GET['post'])) {
-                $post = get_post($_GET['post']);
-                $typenow = $post->post_type;
-            }
-            // try to pick it up from the quick edit AJAX post
-            elseif (!empty($_POST['post_ID'])) {
-                $post = get_post($_POST['post_ID']);
-                $typenow = $post->post_type;
-            }
-        }
-
-        return $typenow;
-    }
-
-    /**
      * Used to get the current post id.
      *
      * @static
      * @since	0.1
      * @return	int post ID
      */
-    static function get_post_id()
+    static function get_user_id()
     {
-        global $post;
+        $p_user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null ;
 
-        $p_post_id = isset($_POST['post_ID']) ? $_POST['post_ID'] : null ;
+        $g_user_id = isset($_GET['user_id']) ? $_GET['user_id'] : null ;
 
-        $g_post_id = isset($_GET['post']) ? $_GET['post'] : null ;
+        $user_id = $g_user_id ? $g_user_id : $p_user_id;
 
-        $post_id = $g_post_id ? $g_post_id : $p_post_id ;
 
-        $post_id = isset($post->ID) ? $post->ID : $post_id ;
-
-        if (isset($post_id))
+        if (isset($user_id))
         {
             return (integer) $post_id;
         }
@@ -1083,7 +636,6 @@ class MM_Metabox extends MetaMaterial
 
             if (!empty($this->include_template))
             {
-
                 if (in_array(self::$current_post->template_file,$this->include_template))
                 {
                     $can_output = TRUE;
@@ -1195,6 +747,7 @@ class MM_Metabox extends MetaMaterial
         {
             $can_output = FALSE;
         }
+
         // filter: output (can_output)
         if ($this->has_filter('output'))
         {
@@ -1218,10 +771,6 @@ class MM_Metabox extends MetaMaterial
         $out .= ' .postbox.locked.open > h3 { cursor:inherit; }';
         //hide tocopy's
         $out .= ' .mm_group.mm_tocopy { display:none; } ';
-        //spacing for after_title
-        $out .= ' #after_title-sortables{ margin-top:20px; }';
-        //spacing for after_editor
-        $out .= ' #after_editor-sortables{ margin-top:20px; }';
 
         return $out;
         }else{
@@ -1351,7 +900,7 @@ class MM_Metabox extends MetaMaterial
                 }
 
                 checkLoopLimit($the_name);
-                $the_clone.trigger('mm_copy',[$the_name,$the_clone]);
+
                 $the_clone.trigger('mm_copy.'+$the_name, $the_name);
             });
 
@@ -1690,7 +1239,7 @@ class MM_Metabox extends MetaMaterial
         }
 
         // get current fields, use $real_post_id (checked for in both modes)
-        $current_fields = get_post_meta($real_post_id, $this->meta_key . '_fields', TRUE);
+        $current_fields = get_post_meta($real_post_id, $this->id . '_fields', TRUE);
 
         if ($this->mode == self::STORAGE_MODE_EXTRACT)
         {
@@ -1724,7 +1273,6 @@ class MM_Metabox extends MetaMaterial
             {
                 foreach ($diff_fields as $field)
                 {
-                    $field = ($this->prefix)?$this->meta_key . '_' . $field : $field;
                     delete_post_meta($post_id,$field);
                 }
             }

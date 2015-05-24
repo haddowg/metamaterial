@@ -29,9 +29,12 @@ namespace HaddowG\MetaMaterial;
  *
  */
 
-use stdClass;
-
-class MM_Taxonomy extends MetaMaterial
+/**
+ * Class MM_Taxonomy
+ *
+ * @package HaddowG\MetaMaterial
+ */
+class MM_Taxonomy extends Metamaterial
 {
     /**
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
@@ -116,7 +119,10 @@ class MM_Taxonomy extends MetaMaterial
      */
     private $include_term_id;
 
-    private $show_on_new= TRUE;
+	/**
+	 * @var bool
+	 */
+	private $show_on_new= TRUE;
     /**
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
      *  INTERNAL USE VALUES
@@ -124,7 +130,10 @@ class MM_Taxonomy extends MetaMaterial
      */
     private $meta_term_id;
 
-    private $in_new = FALSE;
+	/**
+	 * @var bool
+	 */
+	private $in_new = FALSE;
 
     /**
      * Array of admin page targets on which this MetaMaterial Class is designed to display.
@@ -287,18 +296,29 @@ class MM_Taxonomy extends MetaMaterial
 
     }
 
-    public function prep(){
+	/**
+	 *
+	 */
+	public function prep(){
         parent::prep();
         foreach($this->taxonomies as $tax){
             add_action('create_' . $tax, array($this, 'save'));
         }
     }
 
-    protected function init_once(){
+	/**
+	 *
+	 */
+	protected function init_once(){
         add_filter( 'admin_body_class', 'HaddowG\MetaMaterial\MM_Taxonomy::add_taxonomy_body_classes' );
     }
 
-    public static function add_taxonomy_body_classes($classes){
+	/**
+	 * @param $classes
+	 *
+	 * @return string
+	 */
+	public static function add_taxonomy_body_classes($classes){
        global $taxnow;
        $classes = explode(' ',$classes);
 
@@ -317,23 +337,33 @@ class MM_Taxonomy extends MetaMaterial
        return implode(' ',$classes);
     }
 
-    public function render()
+	/**
+	 *
+	 */
+	public function render()
     {
         $this->in_template = TRUE;
         $this->in_new = FALSE;
-        $term = FALSE;
+	    /** @noinspection PhpUnusedLocalVariableInspection */
+	    $term = FALSE;
         $tid = $_REQUEST['tag_ID'];
         
         if(!empty($tid)){
+	        /** @noinspection PhpUnusedLocalVariableInspection */
             $term = get_term($tid ,get_current_screen()->taxonomy);
         }else{
             $this->in_new = TRUE;
         }
         // shortcuts
+	    /** @noinspection PhpUnusedLocalVariableInspection */
         $mb =& $this;
+	    /** @noinspection PhpUnusedLocalVariableInspection */
         $metabox =& $this;
+	    /** @noinspection PhpUnusedLocalVariableInspection */
         $mm =& $this;
+	    /** @noinspection PhpUnusedLocalVariableInspection */
         $id = $this->id;
+	    /** @noinspection PhpUnusedLocalVariableInspection */
         $meta = $this->meta(NULL, TRUE);
 
         echo '<' . ($this->is_new()?'div':'tr') . ' id="' . $this->id . '_metamaterial" class="mm_taxonomybox">' . ($this->is_new()?'':'<td colspan="2">');
@@ -342,7 +372,8 @@ class MM_Taxonomy extends MetaMaterial
         }
         echo '<div class="mm_taxonomybox_content">';
         // use include because users may want to use one template for multiple meta boxes
-        include $this->template;
+	    /** @noinspection PhpIncludeInspection */
+	    include $this->template;
         // create a nonce for verification
         echo '<input type="hidden" name="'. $this->id .'_nonce" value="' . wp_create_nonce($this->id) . '" />';
         echo '</div>';
@@ -352,7 +383,12 @@ class MM_Taxonomy extends MetaMaterial
 
     }
 
-    function get_term($term)
+	/**
+	 * @param $term
+	 *
+	 * @return mixed
+	 */
+	function get_term($term)
     {
         if (in_array($term->taxonomy, $this->taxonomies))
         {
@@ -456,7 +492,10 @@ class MM_Taxonomy extends MetaMaterial
     }
 
 
-    public function get_global_style()
+	/**
+	 * @return string
+	 */
+	public function get_global_style()
     {
         if(self::is_target_admin()){
             $out='';
@@ -474,10 +513,11 @@ class MM_Taxonomy extends MetaMaterial
         }
     }
 
-    /**
-     *
-     */
-    public function get_global_script()
+
+	/**
+	 * @return bool|string
+	 */
+	public function get_global_script()
     {
 
         // must be a targeted admin page
@@ -491,11 +531,9 @@ class MM_Taxonomy extends MetaMaterial
         <script type="text/javascript">
         /* <![CDATA[ */
 
-
-
         jQuery(function($)
         {
-            jQuery(document).ajaxComplete(function(event, xhr, settings) {
+            $(document).ajaxComplete(function(event, xhr, settings) {
                 if (xhr && xhr.readyState === 4 && xhr.status === 200
                     && settings.data && settings.data.indexOf('action=add-tag') >= 0) {
 
@@ -506,7 +544,7 @@ class MM_Taxonomy extends MetaMaterial
                     jQuery('img[data-placeholder]').each(function(){
                         jQuery(this).attr('src',jQuery(this).data('placeholder'));
                     });
-                    jQuery('#addtag').trigger("reset");;
+                    jQuery('#addtag').trigger("reset");
                 }
             });
 
@@ -788,10 +826,15 @@ class MM_Taxonomy extends MetaMaterial
         return $this->meta;
     }
 
-    /**
-     * @since	0.1
-     * @access	public
-     */
+	/**
+	 * @since    0.1
+	 * @access    public
+	 *
+	 * @param null $term_id
+	 * @param bool $is_ajax
+	 *
+	 * @return bool
+	 */
     public function save($term_id=NULL, $is_ajax = false)
     {
         global $taxnow;

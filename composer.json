@@ -1,5 +1,6 @@
 {
     "name": "haddowg/metamaterial",
+    "type": "wordpress-muplugin",
     "description": "MetaMaterial is an extensive framework for handling metadata in WordPress.",
     "license": "GPL-3",
 	"authors": [
@@ -11,7 +12,8 @@
     ],
     "minimum-stability": "dev",
     "require": {
-	"php": ">=5.4.0"
+	    "php": ">=5.4.0",
+        "composer/installers": "~1.0"
     },
     "autoload": {
         "psr-4": {

@@ -29,10 +29,8 @@ namespace HaddowG\MetaMaterial;
  *
  */
 
-use stdClass;
 
-
-class MM_Dashboard extends MetaMaterial
+class MM_Dashboard extends Metamaterial
 {
     /**
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
