@@ -220,8 +220,6 @@ class MetaMaterialTest extends MetaMaterialTestCase {
             return $mm;
         });
 
-        $ref = new ReflectionClass('HaddowG\MetaMaterial\MM_Minimal');
-
         $mm = Metamaterial::getInstance('test', array(), 'HaddowG\MetaMaterial\MM_Minimal');
 
         $this->setPrivateProperties($mm,array('id'=>'test','ajax_save'=>true));
@@ -246,7 +244,6 @@ class MetaMaterialTest extends MetaMaterialTestCase {
             return $mm;
         });
 
-        $ref = new ReflectionClass('HaddowG\MetaMaterial\MM_Minimal');
 
         $mm = Metamaterial::getInstance('test', array(), 'HaddowG\MetaMaterial\MM_Minimal');
 

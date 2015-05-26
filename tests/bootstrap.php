@@ -1,8 +1,6 @@
 <?php
-
+    spl_autoload_extensions('.php');
     require dirname(dirname(__FILE__)).'/vendor/autoload.php';
-
-
 
     spl_autoload_register(
         function ( $pClassName ) {

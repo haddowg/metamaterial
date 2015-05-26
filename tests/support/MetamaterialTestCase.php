@@ -7,7 +7,7 @@ class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
     static $MINIMAL_CONF = array();
 
     public function setUp(){
-
+        WP_Mock::setUsePatchwork(true);
         WP_Mock::setUp();
         self::$MINIMAL_CONF = array(
             'template' => self::$SUPPORT_DIR. 'templates/empty.php'
