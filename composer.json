@@ -16,6 +16,10 @@
       {
         "type": "vcs",
         "url": "https://github.com/haddowg/wp_mock"
+      },
+      {
+        "type": "vcs",
+        "url": "https://github.com/haddowg/patchwork/"
       }
     ],
     "require": {

@@ -3,7 +3,7 @@
 
     require dirname(dirname(__FILE__)).'/vendor/autoload.php';
 
-    spl_autoload_extensions('.php');
+    spl_autoload_extensions('.php,.inc');
     spl_autoload_register(
         function ( $pClassName ) {
             spl_autoload( dirname(dirname(__FILE__)).'/src/' . strtolower( str_replace( "\\", "/", $pClassName ) ));
