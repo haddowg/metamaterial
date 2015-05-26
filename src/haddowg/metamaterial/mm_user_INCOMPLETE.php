@@ -337,7 +337,7 @@ class MM_User extends Metamaterial
         add_action('edit_user_profile_update', array($this,'save'));
     }
 
-    protected function init_once(){
+    protected static function init_once(){
         add_filter( 'admin_body_class', 'HaddowG\MetaMaterial\MM_User::add_user_body_classes' );
     }
 
@@ -399,7 +399,7 @@ class MM_User extends Metamaterial
 
         if (isset($user_id))
         {
-            return (integer) $post_id;
+            return (integer) $user_id;
         }
 
         return null;
@@ -786,7 +786,7 @@ class MM_User extends Metamaterial
 
         // must be a targeted admin page
         if (!self::is_target_admin()) {
-            return;
+            return true;
         }
 
         ob_start();
@@ -959,7 +959,7 @@ class MM_User extends Metamaterial
                 var $pt = $('#post_type').eq(0).val();
                 var $pid = $('#post_ID').eq(0).val();
                 var $fields = $('[name^="' + $mm_id + '"]' ,$metabox);
-                var $action = $(this).data('mm_ajax_action') || 'ajax_save'
+                var $action = $(this).data('mm_ajax_action') || 'ajax_save';
                 var $on_success = $(this).data('mm_on_success');
                 var $on_error = $(this).data('mm_on_error');
                 var $data = {
@@ -1156,8 +1156,11 @@ class MM_User extends Metamaterial
     }
 
     /**
-     * @since	0.1
-     * @access	public
+     * @since    0.1
+     * @access    public
+     * @param $post_id
+     * @param bool $is_ajax
+     * @return
      */
     public function save($post_id, $is_ajax=FALSE)
     {

@@ -6,9 +6,6 @@ class MM_Minimal extends Metamaterial{
 
     const MM_TYPE = 'minimal';
 
-    public function __construct($id='mocked',$config=array()){
-        parent::construct($id,$config);
-    }
     /**
      * @return mixed
      */
@@ -20,7 +17,7 @@ class MM_Minimal extends Metamaterial{
     /**
      * @return mixed
      */
-    protected function init_once()
+    protected static function init_once()
     {
         // TODO: Implement init_once() method.
     }
@@ -87,4 +84,8 @@ class MM_Minimal extends Metamaterial{
         // TODO: Implement save() method.
     }
 
+    protected function applyConfig($id, &$config)
+    {
+        // TODO: Implement applyConfig() method.
+    }
 }

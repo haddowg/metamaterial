@@ -157,12 +157,13 @@ abstract class Metamaterial
      *
      * STORAGE_MODE_ARRAY (default) - Data will be stored as an associative array in a single meta entry in the wp_postmeta table.
      *
-	 * STORAGE_MODE_EXTRACT - Data will be saved as individual entries in the wp_postmeta table,
-     * an additional 'fields' meta will be saved to indicate the fields that are present and to speed retrieval.
+	 * STORAGE_MODE_EXTRACT - each field in the data will be saved as an individual entry in the postmeta table,
+     * an additional 'fields' meta will be saved to indicate the fields that are present and to speed mass retrieval.
+     * NOTE: nested fields will not be separated but will appear with their owning top level field's entry.
 	 *
      * Config Option
      *
-     * @todo    maybe add a STORAGE_MODE_TABLE option to store/retrieve values from a dedicated table. would require type hinting and greater validation, how to handle nesting without serialize?
+     * @todo    maybe add a STORAGE_MODE_TABLE option to store/retrieve values from a dedicated table. would require type hinting and greater validation, how to handle nesting without serialize? nesteed set?
 	 * @since	0.1
 	 * @access	protected
 	 * @var		string either STORAGE_MODE_ARRAY or STORAGE_MODE_EXTRACT to indicate desired storage mode.
@@ -197,7 +198,7 @@ abstract class Metamaterial
 	 * @var		bool whether to prefix keys when using STORAGE_MODE_EXTRACT
      * @see     $mode, $meta_key, STORAGE_MODE_ARRAY, STORAGE_MODE_EXTRACT
 	 */
-    protected $prefix = FALSE;
+    protected $prefix = TRUE;
 
     /**
 	 * Used to hide the default elements on the page.
@@ -218,9 +219,9 @@ abstract class Metamaterial
 	protected $hide_on_screen;
 
     /**
-     * If FALSE only the first showing metaboxes $hide_on_screen values will be considered.
+     * If FALSE only the first showing metabox's $hide_on_screen values will be considered.
      * When this is the default TRUE all showing metaboxes have their $hide_on_screen values
-     * combined to determine what should be hidden.
+     * merged to determine what should be hidden.
      *
      * Config Option
      *
@@ -279,9 +280,21 @@ abstract class Metamaterial
 	 */
     protected $save_filter;
 
-	/**
-	 * @var
-	 */
+    /**
+     * Ajax Save Success Filter function callback used to modify ajax response on successful ajax save.
+     *
+     * Filter function should return modified array, containing at least 'message'.
+     * Filter function should accept 2 arguments:
+     *  - array $ajax_return array of data to be returned
+     *	- int $object_id - the id of the object that was saved
+     *
+     * Config Option
+     *
+     * @since	0.1
+     * @access	protected
+     * @var		callable see description for provided arguments and expected return
+     * @see		add_filter(), global_init()
+     */
 	protected $ajax_save_success_filter;
 
 	/**
@@ -347,12 +360,22 @@ abstract class Metamaterial
 	/**
 	 * @var string path for assets loaded by this Metamaterial instance
 	 */
-	protected $assets_path = false;
+	protected $assets_dir = false;
 
 	/**
 	 * @var string default path for assets loaded by this Metamaterial instance
 	 */
-	public static $default_assets_path = false;
+	public static $default_assets_dir = false;
+
+    /**
+     *
+     * @var bool|string
+     */
+    private $template_path = false;
+
+    protected $templates_dir = false;
+
+    public static $default_templates_dir = false;
 
 	/**
 	 * @var bool
@@ -372,12 +395,12 @@ abstract class Metamaterial
 	 * @since	0.1
 	 * @access	private
 	 * @var		array Array of arrays each of a type of  MetaMaterial instances
-	 * @see		getInstance(), $id, __construct()
+	 * @see		getInstance(), $id
 	 */
     private static $instances =array();
 
 
-    private static $registeredDependencies = array();
+    private static $registeredAliases = array();
 
     /**
 	 * Cached value of can_output(), to prevent re-execution.
@@ -553,13 +576,13 @@ abstract class Metamaterial
 	protected static $hide_on_screen_styles = array();
 
 
-    protected function construct($id, $config = array())
+    public function applyBaseConfig($id, &$config)
     {
-        if(get_called_class()==='HaddowG\Metamaterial\Metamaterial'){
-            throw new MM_Exception('Attempt to instantiate Abstract MetaMaterial Class',500);
-        }
 
         if (is_array($config)) {
+
+            $this->id = $id;
+            $this->loop_data = new stdClass();
 
             $config_defaults = array
             (
@@ -589,6 +612,9 @@ abstract class Metamaterial
                 $this->$n = $v;
             }
 
+            //resolve and cache template path
+            $this->getTemplatePath();
+
             if (isset($config['compound_hide'])) {
                 self::$compound_hide = $config['compound_hide'];
             }
@@ -609,13 +635,15 @@ abstract class Metamaterial
      *
      * @param   string $id Unique id for this MetaMaterial instance
      * @param   array $config Configuration options for this instance, see individual option documentation
-     * @param   Metamaterial|string $type optional class name or object of class extending Metamaterial.
-     * @return  Metamaterial new or existing instance of MetaMaterial
-     * @throws  MM_Exception
-     * @see     __construct()
+     * @param null $class
+     * @return Metamaterial new or existing instance of MetaMaterial
+     * @throws MM_Exception
      */
 	final public static function getInstance($id, $config = array(),$class=NULL)
     {
+        if(empty($id) || is_numeric($id)){
+            throw new MM_Exception('id value is required, and must be a non numeric string',500);
+        }
 
         if(empty($class) || (!is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial'))){
             $class = get_called_class();
@@ -623,10 +651,11 @@ abstract class Metamaterial
 
         if(is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial')){
             if(is_object($class)){
+                /** @var Object $class */
                 $class = get_class($class);
             }
-
-            $resolved = self::resolveDependancy($class);
+            /** @var string $class */
+            $resolved = self::resolveAlias($class);
 
             // ensure type array exists
             if(!array_key_exists($class, self::$instances)){
@@ -637,32 +666,16 @@ abstract class Metamaterial
 
                 // instance doesn't exist yet, so create it
                 if(is_callable($resolved)){
-                    self::$instances[$class][$id] = $resolved($id, $config);
+                    self::$instances[$class][$id] = $resolved();
                 }else {
-                    self::$instances[$class][$id] = new $resolved($id, $config);
+                    self::$instances[$class][$id] = new $resolved();
                 }
-                $newInst = self::$instances[$class][$id];
                 /** @var $newInst Metamaterial */
-                //init data
-                $newInst->id = $id;
-                $newInst->loop_data = new stdClass();
+                $newInst = self::$instances[$class][$id];
 
-                //check minimum requirements
-                //check valid id
-                if (empty($newInst->id)) throw new MM_Exception('Metabox id required',500);
-                if (is_numeric($newInst->id)) throw new MM_Exception('Metabox id must be a non numeric string',500);
+                $newInst->applyBaseConfig($id,$config);
 
-                //check valid template
-                if (empty($newInst->template)) throw new MM_Exception('Metabox template file required',500);
-                //if the template is not found
-                if(!file_exists($newInst->template)){
-                    //try relative to the default /metabox/ directory in the theme folder
-                    if(file_exists(get_stylesheet_directory() . '/metaboxes/' . $newInst->template)){
-                        $newInst->template = get_stylesheet_directory() . '/metaboxes/' . $newInst->template;
-                    }else{
-                        throw new MM_Exception('Unable to locate Metabox template',500);
-                    }
-                }
+                $newInst->applyConfig($id,$config);
 
                 $newInst->initInstanceActions();
 
@@ -680,43 +693,89 @@ abstract class Metamaterial
         }
     }
 
-    final public static function hasInstance($id,$type){
-        // ensure type array exists
-        return (array_key_exists($type, self::$instances)) && array_key_exists($id, self::$instances[$type]);
-    }
+    final public static function hasInstance($id,$class){
 
-
-    final public static function resolveDependancy($classname){
-
-        if(!in_array($classname,array_keys(self::$registeredDependencies))){
-            $registeredTypes[$classname] = $classname;
+        if(empty($class) || (!is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial'))){
+            $class = get_called_class();
         }
-        return self::$registeredDependencies[$classname];
+
+        if(is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial')){
+            return (array_key_exists($class, self::$instances)) && array_key_exists($id, self::$instances[$class]);
+        }
+
+        return false;
+    }
+
+
+    final public static function resolveAlias($classname){
+
+        if(!in_array($classname,array_keys(self::$registeredAliases))){
+            self::$registeredAliases[$classname] = $classname;
+        }
+        return self::$registeredAliases[$classname];
 
     }
 
-    public static function registerDependancy($classname,$resolution){
-        self::$registeredDependencies[$classname] = $resolution;
+    public static function registerAlias($classname,$resolution){
+        if($resolution===null && in_array($classname,array_keys(self::$registeredAliases))){
+            unset(self::$registeredAliases[$classname]);
+        }else{
+            self::$registeredAliases[$classname] = $resolution;
+        }
     }
 
-    public function initInstanceActions(){
+    protected function initInstanceActions(){
 
         //these are added only once, the first time a MetaMaterial is constructed, therefore they run only once for all instances.
-        $this->add_action('admin_head', 'HaddowG\MetaMaterial\MM_Base::global_head', 10, 1, FALSE, FALSE);
-        $this->add_action('admin_footer', 'HaddowG\MetaMaterial\MM_Base::global_foot', 10, 1, FALSE, FALSE);
+        $this->addAction('admin_head', 'HaddowG\MetaMaterial\Metamaterial::globalHead', 10, 1, FALSE, FALSE);
+        $this->addAction('admin_footer', 'HaddowG\MetaMaterial\Metamaterial::globalFoot', 10, 1, FALSE, FALSE);
 
         //register output filters on 'admin_init' so they are available before global_init() runs on the 'current_screen' hook.
         add_action('admin_init', array($this,'prep'));
 
         //this is added only once the first time a MetaMaterial is constructed, therefore runs only once for all instances.
-        $this->add_action('current_screen', 'HaddowG\MetaMaterial\MM_Base::global_init',10,1,FALSE,FALSE);
+        $this->addAction('current_screen', 'HaddowG\MetaMaterial\Metamaterial::global_init',10,1,FALSE,FALSE);
 
         //header and footer actions will be fired only for target admin pages
-        $this->add_action('admin_head', array($this, 'head'), 11, 1, FALSE, TRUE);
-        $this->add_action('admin_footer', array($this,'foot'), 11, 1, FALSE, TRUE);
+        $this->addAction('admin_head', array($this, 'head'), 11, 1, FALSE, TRUE);
+        $this->addAction('admin_footer', array($this,'foot'), 11, 1, FALSE, TRUE);
         if($this->ajax_save){
             add_action('wp_ajax_' . $this->get_action_tag('ajax_save'), array($this, 'ajax_save'));
         }
+    }
+
+    public function getTemplatePath(){
+
+
+        if(empty($this->template)){
+            $this->template_path =false;
+            throw new MM_Exception('template config value is required',500);
+        }
+
+        if($this->template_path){
+            return $this->template_path;
+        }
+
+        if($this->templates_dir){
+            if(file_exists($this->templates_dir . $this->template)) {
+                $this->template_path = $this->templates_dir . $this->template;
+                return $this->template_path;
+            }
+        }
+
+        if(static::$default_templates_dir) {
+            if ( file_exists( static::$default_templates_dir . $this->template ) ) {
+                $this->template_path = static::$default_templates_dir  . $this->template;
+                return $this->template_path;
+            }
+        }
+
+        if( file_exists(trailingslashit( get_stylesheet_directory()) . $this->template )){
+            $this->template_path = trailingslashit( get_stylesheet_directory()) . $this->template;
+            return $this->template_path;
+        }
+
+        throw new MM_Exception('Unable to locate template file, please ensure path and filename are correct.',500);
     }
 
 	/**
@@ -873,6 +932,8 @@ abstract class Metamaterial
     }
 
 
+    protected abstract function applyConfig($id,&$config);
+
 	/**
 	 * @return mixed
 	 */
@@ -881,7 +942,9 @@ abstract class Metamaterial
 	/**
 	 * @return mixed
 	 */
-	protected abstract function init_once();
+	protected static function init_once(){
+        // no default behaviour override in extending class to use.
+    }
 
 	/**
 	 * Adds all appropriate metaboxes for the current page from any Instances of MetaMaterial.
@@ -903,52 +966,41 @@ abstract class Metamaterial
 		foreach($showing as $mm){
             $mm->init();
 
-            $filters = array('save');
+            $filters = array('save'=>3);
 
             if($mm->ajax_save){
-                $filters[]='ajax_save_success';
-                $filters[]='ajax_save_fail';
+                $filters['ajax_save_success'] = 2;
+                $filters['ajax_save_fail'] = 2;
             }
 
-            foreach ($filters as $filter)
+            foreach ($filters as $filter => $args)
             {
                 $var = 'get_' . $filter . '_filter';
                 $fltr = $mm->$var();
 
                 if (!empty($fltr))
                 {
-                    if ('save' == $filter)
-                    {
-                        $mm->add_filter($filter, $fltr, 10, 3);
-                    }
-                    else
-                    {
-                        $mm->add_filter($filter, $fltr);
-                    }
+                    $mm->add_filter($filter, $fltr, 10, $args);
                 }
             }
 
-            $actions = array('save', 'head', 'foot', 'init');
+            $actions = array(
+                'save'=>3,
+                'head'=>1,
+                'foot'=>1,
+                'init'=>1
+            );
 
-            foreach ($actions as $action)
+            foreach ($actions as $action => $args)
             {
                 $var = 'get_' . $action . '_action';
                 $actn = $mm->$var();
 
                 if (!empty($actn))
                 {
-                    if ('save' == $action)
-                    {
-                        $mm->add_action($action, $actn, 10, 3);
-                    }
-                    else
-                    {
-                        $mm->add_action($action, $actn);
-                    }
+                  $mm->addAction($action, $actn, 10, $args);
                 }
             }
-
-
 
             if ($mm->has_action('init'))
             {
@@ -1145,7 +1197,7 @@ abstract class Metamaterial
      * @param bool $suffixes
      * @param bool $once
      */
-    protected function add_action($tag, $function_to_add, $priority = 10, $accepted_args = 1, $prefix = TRUE, $suffixes = FALSE, $once = TRUE)
+    protected function addAction($tag, $function_to_add, $priority = 10, $accepted_args = 1, $prefix = TRUE, $suffixes = FALSE, $once = TRUE)
 	{
         if($suffixes && empty($suffixes)){
             $suffixes = static::$admin_targets;
@@ -1329,14 +1381,14 @@ abstract class Metamaterial
 
 	public function get_asset_url($asset){
 
-		if( $this->assets_url && $this->assets_path ){
-			if(file_exists($this->assets_path . $asset)) {
+		if( $this->assets_url && $this->assets_dir ){
+			if(file_exists($this->assets_dir . $asset)) {
 				return $this->assets_url . $asset;
 			}
 		}
 
-		if(static::$default_assets_url && static::$default_assets_path) {
-			if ( file_exists( static::$default_assets_path . $asset ) ) {
+		if(static::$default_assets_url && static::$default_assets_dir) {
+			if ( file_exists( static::$default_assets_dir . $asset ) ) {
 				return static::$default_assets_url  . $asset;
 			}
 		}
@@ -1464,9 +1516,9 @@ abstract class Metamaterial
 	 * @static
 	 * @since	0.1
 	 * @access	private
-	 * @see		global_foot()
+	 * @see		globalFoot()
 	 */
-	static function global_head()
+	static function globalHead()
 	{
         self::print_global_styles();
 		self::print_global_scripts();
@@ -1479,9 +1531,9 @@ abstract class Metamaterial
 	 * @static
 	 * @since	0.1
 	 * @access	public
-	 * @see		global_head()
+	 * @see		globalHead()
 	 */
-	public static function global_foot()
+	public static function globalFoot()
 	{
 
 	}
@@ -2524,18 +2576,27 @@ abstract class Metamaterial
         }
 	}
 
-	/**
-	 *
-	 */
-	public static function logInstances(){
+    /**
+     * @param bool $return
+     * @return null|string
+     */
+	public static function listInstances($return=false){
+
+        $str='';
 
         foreach(self::$instances as $k => $v){
-            error_log($k);
+            $str .= "\r\n" . ($k) . "\r\n";
             foreach($v as $mm){
-                error_log('     ' . get_class($mm));
+                $str .= ('     ' . get_class($mm)) . "\r\n";
             }
         }
 
+        if($return){
+            return $str;
+        }else{
+            echo($str);
+            return null;
+        }
     }
 
     /**
@@ -2544,6 +2605,7 @@ abstract class Metamaterial
     final public static function purgeInstances(){
 
         self::$instances = array();
+        self::$registeredAliases = array();
 
     }
 }

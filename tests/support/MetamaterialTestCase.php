@@ -22,8 +22,10 @@ class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
         );
 
         foreach($mm_classes as $classname){
-            Metamaterial::registerDependancy($classname,function($id,$config) use($classname){
-                $mm =  Mockery::mock($classname,array($id,$config));
+            Metamaterial::registerAlias($classname,function() use($classname){
+                $mm =  Mockery::mock($classname)->shouldAllowMockingProtectedMethods();
+                $mm->shouldReceive('applyBaseConfig')->andReturn(true);
+                $mm->shouldReceive('applyConfig')->andReturn(true);
                 $mm->shouldReceive('initInstanceActions')->andReturn(true);
                 return $mm;
             });
@@ -31,13 +33,23 @@ class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
     }
 
     public function tearDown() {
-        WP_Mock::tearDown();
         Metamaterial::purgeInstances();
+        WP_Mock::tearDown();
     }
 
     public static function setUpBeforeClass()
     {
         self::$SUPPORT_DIR = dirname(dirname(__FILE__)) . '/support/';
+    }
+
+    public function setPrivateProperties($obj,$properties){
+        $classname = get_class($obj);
+        $reflector = new ReflectionClass($classname);
+        foreach($properties as $k=>$v){
+            $prop = $reflector->getProperty($k);
+            $prop->setAccessible(true);
+            $prop->setValue($obj,$v);
+        }
     }
 
 }

@@ -130,17 +130,17 @@ class MM_MediaAccess
 
         $this->setAllowedExtensions();
 
-        if ( ! defined('WPALCHEMY_MEDIA_ACCESS_ENABLED'))
+        if ( ! defined('METAMATERIAL_MEDIA_ACCESS_ENABLED'))
         {
             add_action( "admin_enqueue_scripts", array( $this, "enqueueMedia") );
             add_action('admin_footer', array($this, 'initOnce'));
-            define('WPALCHEMY_MEDIA_ACCESS_ENABLED', true);
+            define('METAMATERIAL_MEDIA_ACCESS_ENABLED', true);
         }
 
-        if ( ! defined('WPALCHEMY_MEDIA_ACCESS_ENABLED_' . strtoupper($this->name)))
+        if ( ! defined('METAMATERIAL_MEDIA_ACCESS_ENABLED_' . strtoupper($this->name)))
         {
             add_action('admin_footer', array($this, 'init'));
-            define('WPALCHEMY_MEDIA_ACCESS_ENABLED_' . strtoupper($this->name), true);
+            define('METAMATERIAL_MEDIA_ACCESS_ENABLED_' . strtoupper($this->name), true);
         }
     }
 
@@ -201,9 +201,12 @@ class MM_MediaAccess
      *
      * @since   0.1
      * @access  public
-     * @param   array $attr INPUT tag parameters
-     * @param   string $type either 'id' or 'thumb' indicates the desired data from the media modal
-     * @return  HTML
+     * @param $id
+     * @param $name
+     * @param array $options
+     * @return string HTML string
+     * @internal param array $attr INPUT tag parameters
+     * @internal param string $type either 'id' or 'thumb' indicates the desired data from the media modal
      */
     public function getField($id, $name, $options = array() )
     {
@@ -257,7 +260,7 @@ class MM_MediaAccess
 
 
             $placeholder =array();
-            if((!is_array($options['thumb_size']) )|| (is_array($options['thumb_size'] && count($options['thumb_size']<2)))){
+            if((!is_array($options['thumb_size']) )|| (is_array($options['thumb_size'] && count($options['thumb_size']) < 2))){
                 $size = $this->get_image_sizes($options['thumb_size']);
                 if(!$size){
                     $size = $this->get_image_sizes('thumbnail');
@@ -288,6 +291,7 @@ class MM_MediaAccess
 
         if($options['echo']){
             echo $out;
+            return false;
         }else{
             return $out;
         }
@@ -354,7 +358,8 @@ class MM_MediaAccess
      * @since   0.1
      * @access  public
      * @param   string $type
-     * @return  string css class(es)
+     * @param null $groupname
+     * @return string css class(es)
      */
     public function getClass($type = 'id', $groupname = null)
     {
@@ -368,7 +373,8 @@ class MM_MediaAccess
      *
      * @since   0.1
      * @access  public
-     * @return  HTML
+     * @param array $attr
+     * @return string HTML string
      * @see     getField(), getButtonClass(), getButtonLink()
      */
     public function getButton(array $attr = array())
@@ -457,7 +463,9 @@ class MM_MediaAccess
 
                                 for (k in $areas)
                                 {
-                                    keys.push(k);
+                                    if $areas.hasOwnProperty(k){
+                                        keys.push(k);
+                                    }
                                 }
                                 keys.sort(function(a, b){return a-b});
                                 for (i = 0; i < keys.length; i++)
@@ -506,7 +514,7 @@ class MM_MediaAccess
                             }
                         }
                     }
-                }
+                };
 
                 var constrainDimensions  = function(origW, origH, maxW, maxH){
                     var h = origH;
@@ -520,7 +528,7 @@ class MM_MediaAccess
                         w = maxW;
                     }
                     return {'width':w,'height':h}
-                }
+                };
 
                 /* ]]> */
             </script><?php
@@ -532,7 +540,6 @@ class MM_MediaAccess
      *
      * @since   0.1
      * @access  public
-     * @return  HTML/Javascript
      */
     public function init()
     {
@@ -614,7 +621,7 @@ class MM_MediaAccess
                                 attachment = media_frame_<?php echo $this->name; ?>.state().get('selection').first().toJSON();
                                 console.log(attachment);
                                 //Check File Type
-                                if ( !($fileType == attachment.type || $fileType == attachment.mime ) ){ return };
+                                if ( !($fileType == attachment.type || $fileType == attachment.mime ) ){ return false; }
 
                                 // Do something with attachment here
                                 $name = jQuery(media_frame_<?php echo $this->name; ?>_trigger).attr('class').match(/<?php echo $this->classNames['trigger']; ?>-([a-zA-Z0-9_-]*)/i);

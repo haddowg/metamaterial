@@ -757,7 +757,7 @@ class MM_Metabox extends Metamaterial
         add_action('save_post', array($this,'save'));
     }
 
-    protected function init_once(){
+    protected static function init_once(){
         // Allow 'before_title' and 'after_title' contexts
         add_action('edit_form_after_title', 'HaddowG\MetaMaterial\MM_Metabox::edit_form_after_title');
         // Allow 'after_editor' context
@@ -1295,8 +1295,11 @@ class MM_Metabox extends Metamaterial
     }
 
     /**
-     * @since	0.1
-     * @access	public
+     * @since    0.1
+     * @access    public
+     * @param $post_id
+     * @param bool $is_ajax
+     * @return
      */
     public function save($post_id, $is_ajax=FALSE)
     {
@@ -1368,7 +1371,7 @@ class MM_Metabox extends Metamaterial
                     return $post_id;
                 }else{
                     $ajax_return = $this->apply_filters('ajax_save_fail',array(
-                        'error' => __( 'Save Aborted') . $_POST['post_type']
+                        'error' => __('Save Aborted') . ' ' . $_POST['post_type']
                     ));
                     wp_send_json_error($ajax_return);
                 }
@@ -1464,9 +1467,10 @@ class MM_Metabox extends Metamaterial
         if($is_ajax){
             $ajax_return = array(
                 'message'=> __('Save Successful.'),
-                'fields' => $new_data
+                'fields' => $new_data,
+                'id'     => $real_post_id
             );
-            $ajax_return = $this->apply_filters('ajax_save_success',$ajax_return);
+            $ajax_return = $this->apply_filters('ajax_save_success',$ajax_return, $real_post_id);
             wp_send_json_success($ajax_return);
         }
 

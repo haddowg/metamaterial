@@ -372,8 +372,8 @@ class MM_Dashboard extends Metamaterial
         add_action('wp_ajax_' . $this->get_action_tag('ajax_get_config'), array($this, 'ajax_get_config'));
     }
 
-    protected function init_once(){
-
+    protected static function init_once(){
+        //nothing to see here... move along!
     }
 
     public function render()
@@ -700,7 +700,7 @@ class MM_Dashboard extends Metamaterial
                 var $pt = $('#post_type').eq(0).val();
                 var $pid = $('#post_ID').eq(0).val();
                 var $fields = $('[name^="' + $mm_id + '"]' ,$metabox);
-                var $action = $(this).data('mm_ajax_action') || 'ajax_save'
+                var $action = $(this).data('mm_ajax_action') || 'ajax_save';
                 var $on_success = $(this).data('mm_on_success');
                 var $on_error = $(this).data('mm_on_error');
                 var $data = {
@@ -855,12 +855,14 @@ class MM_Dashboard extends Metamaterial
     public function ajax_get_config(){
         $this->ajax_get(FALSE);
     }
+
     /**
-     * @since	0.1
-     * @access	public
+     * @since    0.1
+     * @access    public
+     * @param bool $front
      */
     public function ajax_get($front=FALSE){
-        error_log('HIT: ' . print_r($_POST,true));
+
         check_ajax_referer($this->id,'mm_nonce');
         if(isset($_POST['mm_object_id'])){
             if($front){
@@ -935,8 +937,11 @@ class MM_Dashboard extends Metamaterial
     }
 
     /**
-     * @since	0.1
-     * @access	public
+     * @since    0.1
+     * @access    public
+     * @param null $object_id
+     * @param bool $is_ajax
+     * @return bool
      */
     public function save($object_id=NULL, $is_ajax = FALSE)
     {

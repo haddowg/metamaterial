@@ -309,7 +309,7 @@ class MM_Taxonomy extends Metamaterial
 	/**
 	 *
 	 */
-	protected function init_once(){
+	protected static function init_once(){
         add_filter( 'admin_body_class', 'HaddowG\MetaMaterial\MM_Taxonomy::add_taxonomy_body_classes' );
     }
 
