@@ -731,6 +731,7 @@ abstract class Metamaterial
         $this->addAction('admin_footer', 'HaddowG\MetaMaterial\Metamaterial::globalFoot', 10, 1, FALSE, FALSE);
 
         //register output filters on 'admin_init' so they are available before global_init() runs on the 'current_screen' hook.
+
         add_action('admin_init', array($this,'prep'));
 
         //this is added only once the first time a MetaMaterial is constructed, therefore runs only once for all instances.
