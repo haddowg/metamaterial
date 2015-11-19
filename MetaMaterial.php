@@ -1813,7 +1813,7 @@ abstract class MetaMaterial
 			}
 			else
 			{
-				//$this->length = $length+1;
+				$this->length = $length+1;
 			}
 		}
 
