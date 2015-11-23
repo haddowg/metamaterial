@@ -1,5 +1,6 @@
 <?php
-use HaddowG\MetaMaterial\Metamaterial;
+use HaddowG\MetaMaterial\Facades\MMM;
+use HaddowG\MetaMaterial\MetaMaterialManager;
 
 class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
 
@@ -21,24 +22,42 @@ class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
         );
 
         foreach($mm_classes as $classname){
-            Metamaterial::registerAlias($classname,function() use($classname){
-                $mm =  Mockery::mock($classname)->shouldAllowMockingProtectedMethods();
-                $mm->shouldReceive('applyBaseConfig')->andReturn(true);
-                $mm->shouldReceive('applyConfig')->andReturn(true);
-                $mm->shouldReceive('initInstanceActions')->andReturn(true);
-                return $mm;
-            });
+            self::registerMockAlias($classname);
         }
     }
 
     public function tearDown() {
-        Metamaterial::purgeInstances();
         WP_Mock::tearDown();
+        MMM::swap(new MetaMaterialManager());
+        MMM::purgeInstances();
     }
 
     public static function setUpBeforeClass()
     {
         self::$SUPPORT_DIR = dirname(dirname(__FILE__)) . '/support/';
+    }
+
+    public function registerMockAlias($classname, $stubs=[], $base=true){
+        MMM::registerAlias($classname,function() use($classname, $stubs, $base){
+
+            $methods = ($base)?['applyBaseConfig','applyConfig','initInstanceActions']:[];
+            foreach(array_keys($stubs) as $method){
+                $methods[] = $method;
+            }
+
+            $mm =  Mockery::mock($classname . '[' . implode(',',$methods) . ']')->shouldAllowMockingProtectedMethods();
+
+            if($base) {
+                $mm->shouldReceive('applyBaseConfig')->andReturn(true);
+                $mm->shouldReceive('applyConfig')->andReturn(true);
+                $mm->shouldReceive('initInstanceActions')->andReturn(true);
+            }
+            foreach($stubs as $method=>$return){
+                $mm->shouldReceive($method)->andReturn($return);
+            }
+
+            return $mm;
+        });
     }
 
     public function setPrivateProperties($obj,$properties){
@@ -50,5 +69,6 @@ class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
             $prop->setValue($obj,$v);
         }
     }
+
 
 }

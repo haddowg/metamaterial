@@ -469,7 +469,7 @@ class MM_Metabox extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of admin page targets on which this MetaMaterial Class is designed to display
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $admin_targets = array('post.php','post-new.php');
 
@@ -482,7 +482,7 @@ class MM_Metabox extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $priorities = array(
         'top' => self::PRIORITY_TOP,
@@ -500,7 +500,7 @@ class MM_Metabox extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $contexts = array(
         'before_title',
@@ -604,7 +604,7 @@ class MM_Metabox extends Metamaterial
             }
 
             if(isset($config['compound_hide'])){
-                self::$compound_hide = $config['compound_hide'];
+                self::$compoundHide = $config['compound_hide'];
             }
 
             // convert non-array values
@@ -743,12 +743,12 @@ class MM_Metabox extends Metamaterial
         global $typenow;
 
         // must be a targeted admin page
-        if (!static::is_target_admin()) {
+        if (!static::isTargetAdmin()) {
             return;
         }
 
         //add the metabox
-        add_meta_box($this->id . '_metamaterial', $this->get_title(), array($this, 'render'), $typenow, $this->get_context(), $this->get_priority(FALSE,TRUE));
+        add_meta_box($this->id . '_metamaterial', $this->get_title(), array($this, 'render'), $typenow, $this->getContext(), $this->getPriority(FALSE,TRUE));
 
         //add postbox classes
         add_filter('postbox_classes_' . $typenow . '_' . $this->id . '_metamaterial', array($this,'add_postbox_classes'));
@@ -757,7 +757,7 @@ class MM_Metabox extends Metamaterial
         add_action('save_post', array($this,'save'));
     }
 
-    protected static function init_once(){
+    protected static function initOnce(){
         // Allow 'before_title' and 'after_title' contexts
         add_action('edit_form_after_title', 'HaddowG\MetaMaterial\MM_Metabox::edit_form_after_title');
         // Allow 'after_editor' context
@@ -1203,9 +1203,9 @@ class MM_Metabox extends Metamaterial
             $can_output = FALSE;
         }
         // filter: output (can_output)
-        if ($this->has_filter('output'))
+        if ($this->hasFilter('output'))
         {
-            $can_output = $this->apply_filters('output', $can_output, $post_id, $this);
+            $can_output = $this->applyFilters('output', $can_output, $post_id, $this);
         }
 
         $this->will_show = $can_output;
@@ -1215,7 +1215,7 @@ class MM_Metabox extends Metamaterial
 
     public function get_global_style()
     {
-        if(self::is_target_admin()){
+        if(self::isTargetAdmin()){
         $out='';
         $out .= static::build_global_style();
 
@@ -1339,7 +1339,7 @@ class MM_Metabox extends Metamaterial
             if(!$is_ajax){
                 return $post_id;
             }else{
-                $ajax_return = $this->apply_filters('ajax_save_fail',array(
+                $ajax_return = $this->applyFilters('ajax_save_fail',array(
                     'error' => __( 'You do not have permission to edit this ') . $_POST['post_type']
                 ));
                 wp_send_json_error($ajax_return);
@@ -1358,9 +1358,9 @@ class MM_Metabox extends Metamaterial
             $new_data = NULL;
         }
         // filter: save
-        if ($this->has_filter('save'))
+        if ($this->hasFilter('save'))
         {
-            $new_data = $this->apply_filters('save', $new_data, $real_post_id, $is_ajax);
+            $new_data = $this->applyFilters('save', $new_data, $real_post_id, $is_ajax);
 
             /**
              * halt saving
@@ -1370,7 +1370,7 @@ class MM_Metabox extends Metamaterial
                 if(!$is_ajax){
                     return $post_id;
                 }else{
-                    $ajax_return = $this->apply_filters('ajax_save_fail',array(
+                    $ajax_return = $this->applyFilters('ajax_save_fail',array(
                         'error' => __('Save Aborted') . ' ' . $_POST['post_type']
                     ));
                     wp_send_json_error($ajax_return);
@@ -1459,9 +1459,9 @@ class MM_Metabox extends Metamaterial
         }
 
         // action: save
-        if ($this->has_action('save'))
+        if ($this->hasAction('save'))
         {
-            $this->do_action('save', $new_data, $real_post_id, $is_ajax);
+            $this->doAction('save', $new_data, $real_post_id, $is_ajax);
         }
 
         if($is_ajax){
@@ -1470,7 +1470,7 @@ class MM_Metabox extends Metamaterial
                 'fields' => $new_data,
                 'id'     => $real_post_id
             );
-            $ajax_return = $this->apply_filters('ajax_save_success',$ajax_return, $real_post_id);
+            $ajax_return = $this->applyFilters('ajax_save_success',$ajax_return, $real_post_id);
             wp_send_json_success($ajax_return);
         }
 

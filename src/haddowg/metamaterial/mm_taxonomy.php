@@ -141,7 +141,7 @@ class MM_Taxonomy extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of admin page targets on which this MetaMaterial Class is designed to display
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $admin_targets = array('edit-tags.php');
 
@@ -154,7 +154,7 @@ class MM_Taxonomy extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $priorities = array(
         'top' => self::PRIORITY_TOP,
@@ -172,7 +172,7 @@ class MM_Taxonomy extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $contexts = array(
         'normal',
@@ -278,7 +278,7 @@ class MM_Taxonomy extends Metamaterial
      */
     protected function init(){
         // must be a targeted admin page
-        if (!static::is_target_admin()) {
+        if (!static::isTargetAdmin()) {
             return;
         }
         $screen = get_current_screen();
@@ -309,7 +309,7 @@ class MM_Taxonomy extends Metamaterial
 	/**
 	 *
 	 */
-	protected static function init_once(){
+	protected static function initOnce(){
         add_filter( 'admin_body_class', 'HaddowG\MetaMaterial\MM_Taxonomy::add_taxonomy_body_classes' );
     }
 
@@ -481,9 +481,9 @@ class MM_Taxonomy extends Metamaterial
             $can_output = FALSE;
         }
         // filter: output (can_output)
-        if ($this->has_filter('output'))
+        if ($this->hasFilter('output'))
         {
-            $can_output = $this->apply_filters('output', $can_output, null, $this);
+            $can_output = $this->applyFilters('output', $can_output, null, $this);
         }
 
         $this->will_show = $can_output;
@@ -497,7 +497,7 @@ class MM_Taxonomy extends Metamaterial
 	 */
 	public function get_global_style()
     {
-        if(self::is_target_admin()){
+        if(self::isTargetAdmin()){
             $out='';
             $out .= static::build_global_style();
             $out .= ' div.mm_taxonomybox{ margin: 0 0 10px; padding: 8px 0;} ';
@@ -521,7 +521,7 @@ class MM_Taxonomy extends Metamaterial
     {
 
         // must be a targeted admin page
-        if (!self::is_target_admin()) {
+        if (!self::isTargetAdmin()) {
             return FALSE;
         }
 
@@ -865,9 +865,9 @@ class MM_Taxonomy extends Metamaterial
         }
 
         // filter: save
-        if ($this->has_filter('save'))
+        if ($this->hasFilter('save'))
         {
-            $new_data = $this->apply_filters('save', $new_data, $term_id);
+            $new_data = $this->applyFilters('save', $new_data, $term_id);
 
 
             if (FALSE === $new_data) return FALSE;
@@ -952,9 +952,9 @@ class MM_Taxonomy extends Metamaterial
         }
 
         // action: save
-        if ($this->has_action('save'))
+        if ($this->hasAction('save'))
         {
-            $this->do_action('save', $new_data, NULL);
+            $this->doAction('save', $new_data, NULL);
         }
         return TRUE;
     }

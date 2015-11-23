@@ -157,7 +157,7 @@ class MM_User extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of admin page targets on which this MetaMaterial Class is designed to display
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $admin_targets = array('user-edit.php','user-new.php','profile.php','wp-login.php');
 
@@ -170,7 +170,7 @@ class MM_User extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $priorities = array(
         'top' => self::PRIORITY_TOP,
@@ -188,7 +188,7 @@ class MM_User extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $contexts = array(
         'before_personal_table',
@@ -324,7 +324,7 @@ class MM_User extends Metamaterial
         global $typenow;
 
         // must be a targeted admin page
-        if (!static::is_target_admin()) {
+        if (!static::isTargetAdmin()) {
             return;
         }
 
@@ -337,7 +337,7 @@ class MM_User extends Metamaterial
         add_action('edit_user_profile_update', array($this,'save'));
     }
 
-    protected static function init_once(){
+    protected static function initOnce(){
         add_filter( 'admin_body_class', 'HaddowG\MetaMaterial\MM_User::add_user_body_classes' );
     }
 
@@ -749,9 +749,9 @@ class MM_User extends Metamaterial
         }
 
         // filter: output (can_output)
-        if ($this->has_filter('output'))
+        if ($this->hasFilter('output'))
         {
-            $can_output = $this->apply_filters('output', $can_output, $post_id, $this);
+            $can_output = $this->applyFilters('output', $can_output, $post_id, $this);
         }
 
         $this->will_show = $can_output;
@@ -761,7 +761,7 @@ class MM_User extends Metamaterial
 
     public function get_global_style()
     {
-        if(self::is_target_admin()){
+        if(self::isTargetAdmin()){
         $out='';
         $out .= static::build_global_style();
 
@@ -785,7 +785,7 @@ class MM_User extends Metamaterial
     {
 
         // must be a targeted admin page
-        if (!self::is_target_admin()) {
+        if (!self::isTargetAdmin()) {
             return true;
         }
 
@@ -1200,7 +1200,7 @@ class MM_User extends Metamaterial
             if(!$is_ajax){
                 return $post_id;
             }else{
-                $ajax_return = $this->apply_filters('ajax_save_fail',array(
+                $ajax_return = $this->applyFilters('ajax_save_fail',array(
                     'error' => __( 'You do not have permission to edit this ') . $_POST['post_type']
                 ));
                 wp_send_json_error($ajax_return);
@@ -1219,9 +1219,9 @@ class MM_User extends Metamaterial
             $new_data = NULL;
         }
         // filter: save
-        if ($this->has_filter('save'))
+        if ($this->hasFilter('save'))
         {
-            $new_data = $this->apply_filters('save', $new_data, $real_post_id, $is_ajax);
+            $new_data = $this->applyFilters('save', $new_data, $real_post_id, $is_ajax);
 
             /**
              * halt saving
@@ -1231,7 +1231,7 @@ class MM_User extends Metamaterial
                 if(!$is_ajax){
                     return $post_id;
                 }else{
-                    $ajax_return = $this->apply_filters('ajax_save_fail',array(
+                    $ajax_return = $this->applyFilters('ajax_save_fail',array(
                         'error' => __( 'Save Aborted') . $_POST['post_type']
                     ));
                     wp_send_json_error($ajax_return);
@@ -1319,9 +1319,9 @@ class MM_User extends Metamaterial
         }
 
         // action: save
-        if ($this->has_action('save'))
+        if ($this->hasAction('save'))
         {
-            $this->do_action('save', $new_data, $real_post_id, $is_ajax);
+            $this->doAction('save', $new_data, $real_post_id, $is_ajax);
         }
 
         if($is_ajax){
@@ -1329,7 +1329,7 @@ class MM_User extends Metamaterial
                 'message'=> __('Save Successful.'),
                 'fields' => $new_data
             );
-            $ajax_return = $this->apply_filters('ajax_save_success',$ajax_return);
+            $ajax_return = $this->applyFilters('ajax_save_success',$ajax_return);
             wp_send_json_success($ajax_return);
         }
 

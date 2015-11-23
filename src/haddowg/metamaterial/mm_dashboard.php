@@ -133,7 +133,7 @@ class MM_Dashboard extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of admin page targets on which this MetaMaterial Class is designed to display
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $admin_targets = array('index.php');
 
@@ -146,7 +146,7 @@ class MM_Dashboard extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $priorities = array(
         'top' => self::PRIORITY_TOP,
@@ -164,7 +164,7 @@ class MM_Dashboard extends Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $contexts = array(
         'normal',
@@ -339,7 +339,7 @@ class MM_Dashboard extends Metamaterial
      */
     protected function init(){
         // must be a targeted admin page
-        if (!static::is_target_admin()) {
+        if (!static::isTargetAdmin()) {
             return;
         }
         $id = $this->id . '_metamaterial';
@@ -357,7 +357,7 @@ class MM_Dashboard extends Metamaterial
         }
 
         //add the metabox
-        add_meta_box($id, $title, $callback, 'dashboard', $this->get_context(), $this->get_priority(FALSE,TRUE));
+        add_meta_box($id, $title, $callback, 'dashboard', $this->getContext(), $this->getPriority(FALSE,TRUE));
 
         //add postbox classes
         add_filter('postbox_classes_dashboard_' . $id, array($this,'add_postbox_classes'));
@@ -368,11 +368,11 @@ class MM_Dashboard extends Metamaterial
 
     public function prep(){
         parent::prep();
-        add_action('wp_ajax_' . $this->get_action_tag('ajax_get_front'), array($this, 'ajax_get_front'));
-        add_action('wp_ajax_' . $this->get_action_tag('ajax_get_config'), array($this, 'ajax_get_config'));
+        add_action('wp_ajax_' . $this->getActionTag('ajax_get_front'), array($this, 'ajax_get_front'));
+        add_action('wp_ajax_' . $this->getActionTag('ajax_get_config'), array($this, 'ajax_get_config'));
     }
 
-    protected static function init_once(){
+    protected static function initOnce(){
         //nothing to see here... move along!
     }
 
@@ -459,9 +459,9 @@ class MM_Dashboard extends Metamaterial
         }
         $can_output = true;
         // filter: output (can_output)
-        if ($this->has_filter('output'))
+        if ($this->hasFilter('output'))
         {
-            $can_output = $this->apply_filters('output', $can_output, null, $this);
+            $can_output = $this->applyFilters('output', $can_output, null, $this);
         }
 
         $this->will_show = $can_output;
@@ -471,7 +471,7 @@ class MM_Dashboard extends Metamaterial
 
     public function get_global_style()
     {
-        if(self::is_target_admin()){
+        if(self::isTargetAdmin()){
             $out='';
             $out .= static::build_global_style();
             //open header action style
@@ -498,7 +498,7 @@ class MM_Dashboard extends Metamaterial
     {
 
         // must be a targeted admin page
-        if (!self::is_target_admin()) {
+        if (!self::isTargetAdmin()) {
             return FALSE;
         }
 
@@ -957,7 +957,7 @@ class MM_Dashboard extends Metamaterial
            if(!$is_ajax){
                 return FALSE;
            }else{
-               $ajax_return = $this->apply_filters('ajax_save_fail',array(
+               $ajax_return = $this->applyFilters('ajax_save_fail',array(
                    'error' => __( 'You do not have permission to edit this dashboard widget')
                ));
                wp_send_json_error($ajax_return);
@@ -974,16 +974,16 @@ class MM_Dashboard extends Metamaterial
         }
 
         // filter: save
-        if ($this->has_filter('save'))
+        if ($this->hasFilter('save'))
         {
-            $new_data = $this->apply_filters('save', $new_data, NULL, $is_ajax);
+            $new_data = $this->applyFilters('save', $new_data, NULL, $is_ajax);
 
 
             if (FALSE === $new_data){
                 if(!$is_ajax){
                     return FALSE;
                 }else{
-                    $ajax_return = $this->apply_filters('ajax_save_fail',array(
+                    $ajax_return = $this->applyFilters('ajax_save_fail',array(
                         'error' => __( 'Save Aborted') . $_POST['post_type']
                     ));
                     wp_send_json_error($ajax_return);
@@ -1070,9 +1070,9 @@ class MM_Dashboard extends Metamaterial
         }
 
         // action: save
-        if ($this->has_action('save'))
+        if ($this->hasAction('save'))
         {
-            $this->do_action('save', $new_data, NULL, $is_ajax);
+            $this->doAction('save', $new_data, NULL, $is_ajax);
         }
 
         if($is_ajax){
@@ -1087,7 +1087,7 @@ class MM_Dashboard extends Metamaterial
                 'front' => $front,
                 'button' => $this->get_state_toggle_button()
             );
-            $ajax_return = $this->apply_filters('ajax_save_success',$ajax_return);
+            $ajax_return = $this->applyFilters('ajax_save_success',$ajax_return);
             wp_send_json_success($ajax_return);
         }
 

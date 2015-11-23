@@ -9,7 +9,7 @@ class MM_Minimal extends Metamaterial{
     /**
      * @return mixed
      */
-    protected function init()
+    public function init()
     {
         // TODO: Implement init() method.
     }
@@ -17,7 +17,7 @@ class MM_Minimal extends Metamaterial{
     /**
      * @return mixed
      */
-    protected static function init_once()
+    public static function initOnce()
     {
         // TODO: Implement init_once() method.
     }

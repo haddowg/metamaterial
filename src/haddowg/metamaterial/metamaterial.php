@@ -3,6 +3,7 @@ namespace HaddowG\MetaMaterial;
 
 use stdClass;
 use WP_Embed;
+use HaddowG\MetaMaterial\Facades\MMM;
 
 if (!defined('PHP_INT_MIN')) {
 
@@ -226,11 +227,11 @@ abstract class Metamaterial
      * Config Option
      *
      * @since   0.1
-     * @access  protected
+     * @access  private
      * @var     boolean whether to compound $hide_on_screen values
      * @see     $hide_on_screen
      */
-    protected static $compound_hide = TRUE;
+    private static $compound_hide = TRUE;
 
 	/**
 	 * Callback function triggered on the WordPress "current_screen" action
@@ -241,7 +242,7 @@ abstract class Metamaterial
 	 * @since	0.1
 	 * @access	protected
 	 * @var		callable
-     * @see     global_init()
+     * @see     globalInit()
 	 */
     protected $init_action;
 
@@ -276,7 +277,7 @@ abstract class Metamaterial
 	 * @since	0.1
 	 * @access	protected
 	 * @var		callable see description for provided arguments and expected return
-	 * @see		$save_action, add_filter(), global_init()
+	 * @see		$save_action, add_filter(), globalInit()
 	 */
     protected $save_filter;
 
@@ -293,7 +294,7 @@ abstract class Metamaterial
      * @since	0.1
      * @access	protected
      * @var		callable see description for provided arguments and expected return
-     * @see		add_filter(), global_init()
+     * @see		add_filter(), globalInit()
      */
 	protected $ajax_save_success_filter;
 
@@ -314,7 +315,7 @@ abstract class Metamaterial
 	 * @since	0.1
 	 * @access	protected
 	 * @var		callable save callback
-	 * @see		$save_filter, add_filter(), global_init()
+	 * @see		$save_filter, add_filter(), globalInit()
 	 */
     protected $save_action;
 
@@ -328,7 +329,7 @@ abstract class Metamaterial
 	 * @since	0.1
 	 * @access	protected
 	 * @var		callable head callback for script/style inclusion
-	 * @see		head(), add_action(), global_init()
+	 * @see		head(), add_action(), globalInit()
 	 */
     protected $head_action;
 
@@ -342,7 +343,7 @@ abstract class Metamaterial
 	 * @since	0.1
 	 * @access	protected
 	 * @var		callable foot callback for script/style inclusion
-	 * @see		foot(), add_action(), global_init()
+	 * @see		foot(), add_action(), globalInit()
 	 */
     protected $foot_action;
 
@@ -387,20 +388,6 @@ abstract class Metamaterial
      *  INTERNAL USE VALUES
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
      */
-
-    /**
-	 * Storage array for instances of MetaMaterial
-	 * Array is keyed by instance id's.
-     *
-	 * @since	0.1
-	 * @access	private
-	 * @var		array Array of arrays each of a type of  MetaMaterial instances
-	 * @see		getInstance(), $id
-	 */
-    private static $instances =array();
-
-
-    private static $registeredAliases = array();
 
     /**
 	 * Cached value of can_output(), to prevent re-execution.
@@ -516,23 +503,12 @@ abstract class Metamaterial
     private $loop_stack = array();
 
     /**
-     * Array of MetaMaterial instances showing on the current admin page.
-     * Cached result of get_showing() to avoid re-execution.
-     *
-     * @since   0.1
-     * @access  protected
-     * @var     array Array of MetaMaterial instances showing on the current admin page
-     * @see     get_showing()
-     */
-    protected static $allshowing = null;
-
-    /**
      * Array of admin page targets on which this MetaMaterial Class is designed to display.
      *
      * @since   0.1
      * @access  protected
      * @var     array Array of admin page targets on which this MetaMaterial Class is designed to display
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $admin_targets = array();
 
@@ -545,7 +521,7 @@ abstract class Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
 	protected static $priorities = array(
 									'top' => self::PRIORITY_TOP,
@@ -563,7 +539,7 @@ abstract class Metamaterial
      * @since   0.1
      * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     is_target_admin()
+     * @see     isTargetAdmin()
      */
     protected static $contexts = array(
 									'normal',
@@ -576,6 +552,68 @@ abstract class Metamaterial
 	protected static $hide_on_screen_styles = array();
 
 
+    /**
+     * Initializes generic action hooks for a Metamaterial instance
+     * Some are global and only bound once for any number of metamaterial instances, others are per instance, in both
+     * cases they are run regardless of whether an instance is active on the current page.
+     */
+
+
+	public static function getInstance($id, $config = array(),$class=NULL)
+    {
+        $is_new =!MMM::hasInstance($id,$class);
+
+        $instance = MMM::getInstance($id,$class);
+
+        if($is_new){
+
+            $config = apply_filters('metamaterial_filter_' . $id . '_before_config',$config,$id);
+
+            $instance->applyBaseConfig($id,$config);
+
+            $instance->applyConfig($id,$config);
+
+            $instance->initInstanceActions();
+        }else{
+            if(!empty($config)){
+                throw new MM_Exception('Attempt to pass config to existing instance.',500);
+            }
+        }
+
+        return $instance;
+
+
+    }
+
+
+    protected function initInstanceActions(){
+
+        //these are added only once, the first time a MetaMaterial is constructed, therefore they run only once for all instances.
+        $this->addAction('admin_head', 'HaddowG\MetaMaterial\Metamaterial::globalHead', 10, 1, FALSE, FALSE);
+        $this->addAction('admin_footer', 'HaddowG\MetaMaterial\Metamaterial::globalFoot', 10, 1, FALSE, FALSE);
+
+        //register output filters on 'admin_init' so they are available before globalInit() runs on the 'current_screen' hook.
+        add_action('admin_init', array($this,'prep'));
+
+        //this is added only once the first time a MetaMaterial is constructed, therefore runs only once for all instances.
+        $this->addAction('current_screen', 'HaddowG\MetaMaterial\Metamaterial::globalInit',10,1,FALSE,FALSE);
+
+        //header and footer actions will be fired only for target admin pages
+        $this->addAction('admin_head', array($this, 'head'), 11, 1, FALSE, TRUE);
+        $this->addAction('admin_footer', array($this,'foot'), 11, 1, FALSE, TRUE);
+        if($this->ajax_save){
+            add_action('wp_ajax_' . $this->getActionTag('ajax_save'), array($this, 'ajax_save'));
+        }
+    }
+
+    /**
+     * Applies generic configuration options for all Metamaterial instances.
+     * Ensures template is set, throes exception if not.
+     * @param $id
+     * @param $config
+     * @throws MM_Exception
+     * @see getTemplatePath()
+     */
     public function applyBaseConfig($id, &$config)
     {
 
@@ -603,209 +641,118 @@ abstract class Metamaterial
                 'foot_action' => $this->foot_action
             );
 
+            if (isset($config['compound_hide'])) {
+                self::$compound_hide = (boolean) $config['compound_hide'];
+            }
 
             //discard non config options and merge with defaults
-            $conf = array_merge($config_defaults, array_intersect_key($config, $config_defaults));
+            $config = array_merge($config_defaults, array_intersect_key($config, $config_defaults));
 
             //set instance config options
-            foreach ($conf as $n => $v) {
+            foreach ($config as $n => $v) {
                 $this->$n = $v;
             }
 
             //resolve and cache template path
             $this->getTemplatePath();
 
-            if (isset($config['compound_hide'])) {
-                self::$compound_hide = $config['compound_hide'];
-            }
+
         }else{
             throw new MM_Exception('provided config was not a valid array',500);
         }
     }
 
     /**
-     * Return or create instance of MetaMaterial.
-     * If Instance with this $id exists it will be returned.
-     * If no existing instance exists with this id it will be constructed with the provided $config.
+     * Resolves provided template to an absolute path to an existing file and throws exception if it cant.
+     * Attempts to resolve in the current order:
+     *      - template option as provided (i.e check if already absolute path)
+     *      - relative to the template_path option if provided
+     *      - relative to the default_templates_dir if defined
+     *      - relative to the active theme directory
      *
-     * If config was passed when an instance already exists for the provided $id an exception will be thrown.
-     *
-     * @since   0.1
-     * @access  public
-     *
-     * @param   string $id Unique id for this MetaMaterial instance
-     * @param   array $config Configuration options for this instance, see individual option documentation
-     * @param null $class
-     * @return Metamaterial new or existing instance of MetaMaterial
+     * @return string the resolved absolute path to the template
      * @throws MM_Exception
      */
-	final public static function getInstance($id, $config = array(),$class=NULL)
-    {
-        if(empty($id) || is_numeric($id)){
-            throw new MM_Exception('id value is required, and must be a non numeric string',500);
-        }
-
-        if(empty($class) || (!is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial'))){
-            $class = get_called_class();
-        }
-
-        if(is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial')){
-            if(is_object($class)){
-                /** @var Object $class */
-                $class = get_class($class);
-            }
-            /** @var string $class */
-            $resolved = self::resolveAlias($class);
-
-            // ensure type array exists
-            if(!array_key_exists($class, self::$instances)){
-                self::$instances[$class] = array();
-            }
-            // Check if an instance exists with this key already
-            if (!array_key_exists($id, self::$instances[$class])) {
-
-                // instance doesn't exist yet, so create it
-                if(is_callable($resolved)){
-                    self::$instances[$class][$id] = $resolved();
-                }else {
-                    self::$instances[$class][$id] = new $resolved();
-                }
-                /** @var $newInst Metamaterial */
-                $newInst = self::$instances[$class][$id];
-
-                $newInst->applyBaseConfig($id,$config);
-
-                $newInst->applyConfig($id,$config);
-
-                $newInst->initInstanceActions();
-
-            } else {
-                if (!empty($config)) {
-                    throw new MM_Exception('Attempted to pass config to existing instance of MetaMaterial',500);
-                }
-            }
-            // Return the correct instance of this class
-            return self::$instances[$class][$id];
-
-        }else{
-            throw new MM_Exception('Attempt to instantiate non Metamaterial Class or Abstract MetaMaterial Class.',500);
-
-        }
-    }
-
-    final public static function hasInstance($id,$class){
-
-        if(empty($class) || (!is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial'))){
-            $class = get_called_class();
-        }
-
-        if(is_subclass_of($class, 'HaddowG\MetaMaterial\Metamaterial')){
-            return (array_key_exists($class, self::$instances)) && array_key_exists($id, self::$instances[$class]);
-        }
-
-        return false;
-    }
-
-
-    final public static function resolveAlias($classname){
-
-        if(!in_array($classname,array_keys(self::$registeredAliases))){
-            self::$registeredAliases[$classname] = $classname;
-        }
-        return self::$registeredAliases[$classname];
-
-    }
-
-    public static function registerAlias($classname,$resolution){
-        if($resolution===null && in_array($classname,array_keys(self::$registeredAliases))){
-            unset(self::$registeredAliases[$classname]);
-        }else{
-            self::$registeredAliases[$classname] = $resolution;
-        }
-    }
-
-    protected function initInstanceActions(){
-
-        //these are added only once, the first time a MetaMaterial is constructed, therefore they run only once for all instances.
-        $this->addAction('admin_head', 'HaddowG\MetaMaterial\Metamaterial::globalHead', 10, 1, FALSE, FALSE);
-        $this->addAction('admin_footer', 'HaddowG\MetaMaterial\Metamaterial::globalFoot', 10, 1, FALSE, FALSE);
-
-        //register output filters on 'admin_init' so they are available before global_init() runs on the 'current_screen' hook.
-
-        add_action('admin_init', array($this,'prep'));
-
-        //this is added only once the first time a MetaMaterial is constructed, therefore runs only once for all instances.
-        $this->addAction('current_screen', 'HaddowG\MetaMaterial\Metamaterial::global_init',10,1,FALSE,FALSE);
-
-        //header and footer actions will be fired only for target admin pages
-        $this->addAction('admin_head', array($this, 'head'), 11, 1, FALSE, TRUE);
-        $this->addAction('admin_footer', array($this,'foot'), 11, 1, FALSE, TRUE);
-        if($this->ajax_save){
-            add_action('wp_ajax_' . $this->get_action_tag('ajax_save'), array($this, 'ajax_save'));
-        }
-    }
-
     public function getTemplatePath(){
 
-
+        //abort if we dont have a template option set
         if(empty($this->template)){
             $this->template_path =false;
             throw new MM_Exception('template config value is required',500);
+        }else{
+            if(substr($this->template,strlen($this->template)-4)!=='.php'){
+                $this->template = $this->template . '.php';
+            }
         }
 
+        //return cached path if present
         if($this->template_path){
             return $this->template_path;
         }
 
+        //see if provided template option is an absolute path to existing file.
+        if(file_exists($this->template)) {
+            $this->template_path = $this->template;
+            return $this->template_path;
+        }
+
+        //next try relative to template directory option if provided
         if($this->templates_dir){
-            if(file_exists($this->templates_dir . $this->template)) {
-                $this->template_path = $this->templates_dir . $this->template;
+            if(file_exists(trailingslashit($this->templates_dir) . $this->template)) {
+                $this->template_path = trailingslashit($this->templates_dir) . $this->template;
                 return $this->template_path;
             }
         }
 
+        //next try relative to the default templates directory
         if(static::$default_templates_dir) {
-            if ( file_exists( static::$default_templates_dir . $this->template ) ) {
-                $this->template_path = static::$default_templates_dir  . $this->template;
+            if ( file_exists( trailingslashit(static::$default_templates_dir) . $this->template ) ) {
+                $this->template_path = trailingslashit(static::$default_templates_dir)  . $this->template;
                 return $this->template_path;
             }
         }
 
+        //lastly try relative the the current theme directory
         if( file_exists(trailingslashit( get_stylesheet_directory()) . $this->template )){
             $this->template_path = trailingslashit( get_stylesheet_directory()) . $this->template;
             return $this->template_path;
         }
 
+        //if we haven't found any match throw exception
         throw new MM_Exception('Unable to locate template file, please ensure path and filename are correct.',500);
     }
 
 	/**
 	 * Simple accessor for this metaboxes title
-	 *
-	 * @since   0.1
-     * @access  public
-	 * @return	string the metaboxes title
 	 */
-	public function get_title(){
-		return $this->title;
+	public function theTitle(){
+		echo $this->title;
 	}
+
+    /**
+     * Simple accessor for this metaboxes title
+     *
+     * @return	string the metaboxes title
+     */
+    public function getTitle(){
+        return $this->title;
+    }
+
 
 	/**
 	 * Accessor for this metaboxes context.
 	 * Optionally return the numeric equivalent for use in sorting by passing TRUE as a parameter
 	 *
-	 * @since   0.1
-     * @access  public
 	 * @param	boolean	$numeric whether to return numeric equivalent rather than text value
 	 * @return	string|int the metaboxes context as text or integer
 	 */
-	public function get_context($numeric = FALSE){
+	public function getContext($numeric = FALSE){
 		$cntxt = array_search($this->context,static::$contexts);
         if($numeric){
             if ($cntxt!==FALSE) {
                 return $cntxt;
             } else {
-                return PHP_INT_MAX;
+                return array_search('normal',static::$contexts);
             }
         }else{
 			if ($cntxt!==FALSE) {
@@ -820,13 +767,11 @@ abstract class Metamaterial
      * Accessor for this metaboxes priority.
      * Optionally return the numeric equivalent for use in sorting by passing TRUE as a parameter
      *
-     * @since   0.1
-     * @access  public
      * @param   boolean $numeric whether to return numeric equivalent rather than text value
-     * @param   boolean $sanitized if the textual version needs sanitizing for wordpress internal use
-     * @return    string|int the metaboxes priority as text or integer
+     * @param   boolean $sanitized if non-standard values need casting to nearest wordpress equivalents for wordpress internal use
+     * @return  string|int the metaboxes priority as text or integer
      */
-	public function get_priority($numeric = FALSE,$sanitized=TRUE){
+	public function getPriority($numeric = FALSE,$sanitized=TRUE){
         $p=FALSE;
 		if($numeric){
 			if(is_numeric($this->priority)){
@@ -838,8 +783,8 @@ abstract class Metamaterial
 			return self::PRIORITY_BOTTOM;
 		}else{
 			if (is_numeric($this->priority)) {
-				foreach(static::$priorities as $k => $v){
-					if ($this->priority > $v) {
+				foreach(array_reverse(static::$priorities) as $k => $v){
+					if ($this->priority >= $v) {
 						$p= $k;
 					}
 				}
@@ -862,8 +807,6 @@ abstract class Metamaterial
 	/**
 	 * Simple accessor for this metaboxes save_filter
 	 *
-	 * @since   0.1
-     * @access  public
 	 * @return	callable|null the metaboxes save_filter
 	 * @see		save(), add_filter()
 	 */
@@ -872,14 +815,18 @@ abstract class Metamaterial
     }
 
 	/**
-	 * @return mixed
-	 */
+     * Simple accessor for this metaboxes ajax_save_success_filter
+     *
+	 * @return callable|null the metaboxes ajax_save_success_filter
+     */
 	public function get_ajax_save_success_filter(){
         return $this->ajax_save_success_filter;
     }
 
 	/**
-	 * @return mixed
+     * Simple accessor for this metaboxes ajax_save_fail_filter
+     *
+     * @return callable|null the metaboxes ajax_save_fail_filter
 	 */
 	public function get_ajax_save_fail_filter(){
         return $this->ajax_save_fail_filter;
@@ -926,99 +873,38 @@ abstract class Metamaterial
 	 * @since   0.1
      * @access  public
 	 * @return	callable|null the metaboxes init_action
-	 * @see		$init_action, global_init(), add_action()
+	 * @see		$init_action, globalInit(), add_action()
 	 */
     public function get_init_action(){
         return $this->init_action;
     }
 
-
+    /**
+     * Apply config options specific to the Metamaterial concrete class.
+     *
+     * @param $id string the metabox id
+     * @param $config array the config array (will contain merged default values at this point)
+     */
     protected abstract function applyConfig($id,&$config);
 
 	/**
+     *
 	 * @return mixed
 	 */
-	protected abstract function init();
+	public abstract function init();
 
 	/**
 	 * @return mixed
 	 */
-	protected static function init_once(){
+	public static function initOnce(){
         // no default behaviour override in extending class to use.
     }
 
-	/**
-	 * Adds all appropriate metaboxes for the current page from any Instances of MetaMaterial.
-	 * Registers all necessary actions and filters for each box as appropriate.
-	 *
-	 * @since   0.1
-     * @access  public
-	 * @see		is_target_admin(), get_showing(), add_action(), add_filter()
-	 */
 
-	public static function global_init(){
-
-		$showing = self::get_showing();
-
-		if(empty($showing)){
-			return;
-		}
-
-		foreach($showing as $mm){
-            $mm->init();
-
-            $filters = array('save'=>3);
-
-            if($mm->ajax_save){
-                $filters['ajax_save_success'] = 2;
-                $filters['ajax_save_fail'] = 2;
-            }
-
-            foreach ($filters as $filter => $args)
-            {
-                $var = 'get_' . $filter . '_filter';
-                $fltr = $mm->$var();
-
-                if (!empty($fltr))
-                {
-                    $mm->add_filter($filter, $fltr, 10, $args);
-                }
-            }
-
-            $actions = array(
-                'save'=>3,
-                'head'=>1,
-                'foot'=>1,
-                'init'=>1
-            );
-
-            foreach ($actions as $action => $args)
-            {
-                $var = 'get_' . $action . '_action';
-                $actn = $mm->$var();
-
-                if (!empty($actn))
-                {
-                  $mm->addAction($action, $actn, 10, $args);
-                }
-            }
-
-            if ($mm->has_action('init'))
-            {
-                $mm->do_action('init');
-            }
-		}
-        foreach (self::$instances as $inst) {
-            /** @var $inst Metamaterial[] */
-            if(reset($inst)->is_target_admin()){
-                reset($inst)->init_once();
-            }
-        }
-	}
 
 	/**
 	 * Used to initialize the metabox's output filter, runs on WordPress admin_init action.
-	 * This runs before the global_init() runs on the current_screen action to ensure we can
+	 * This runs before the globalInit() runs on the current_screen action to ensure we can
 	 * correctly determine if a box should be showing or not.
 	 *
 	 * @since	0.1
@@ -1029,7 +915,7 @@ abstract class Metamaterial
 
 		if ( ! empty($this->output_filter))
 		{
-			$this->add_filter('output', $this->output_filter,10,3);
+			$this->addFilter('output', $this->output_filter,10,3);
 		}
 
 	}
@@ -1045,9 +931,9 @@ abstract class Metamaterial
 	public function head()
 	{
 		// action: head
-		if ($this->has_action('head'))
+		if ($this->hasAction('head'))
 		{
-			$this->do_action('head');
+			$this->doAction('head');
 		}
 	}
 
@@ -1062,9 +948,9 @@ abstract class Metamaterial
 	public function foot()
 	{
 		// action: foot
-		if ($this->has_action('foot'))
+		if ($this->hasAction('foot'))
 		{
-			$this->do_action('foot');
+			$this->doAction('foot');
 		}
 	}
 
@@ -1075,9 +961,33 @@ abstract class Metamaterial
      *
 	 * @since	0.1
 	 * @access	protected
-	 * @see		global_init()
+	 * @see		globalInit()
 	 */
 	public abstract function render();
+
+
+    public function addDefaultFilters(){
+
+        $filters = array('save'=>3);
+
+        if($this->ajax_save){
+            $filters['ajax_save_success'] = 2;
+            $filters['ajax_save_fail'] = 2;
+        }
+
+        foreach ($filters as $filter => $args)
+        {
+            $var = 'get_' . $filter . '_filter';
+            $fltr = $this->$var();
+
+            if (!empty($fltr))
+            {
+                $this->addFilter($filter, $fltr, 10, $args);
+            }
+        }
+
+    }
+
 
 	/**
 	 * Used to properly prefix filter tags.
@@ -1088,7 +998,7 @@ abstract class Metamaterial
 	 * @param	string $tag name of the filter
 	 * @return	string uniquely prefixed tag name
 	 */
-	protected function get_filter_tag($tag)
+	protected function getFilterTag($tag)
 	{
 		$prefix = 'metamaterial_filter_' . $this->id . '_';
 		$prefix = preg_replace('/_+/', '_', $prefix);
@@ -1109,9 +1019,9 @@ abstract class Metamaterial
      * @param   int $priority filter priority
      * @param   int $accepted_args filter accepted arguments
      */
-	public function add_filter($tag, $function_to_add, $priority = 10, $accepted_args = 1)
+	public function addFilter($tag, $function_to_add, $priority = 10, $accepted_args = 1)
 	{
-		$tag = $this->get_filter_tag($tag);;
+		$tag = $this->getFilterTag($tag);;
 		add_filter($tag, $function_to_add, $priority, $accepted_args);
 	}
 
@@ -1126,9 +1036,9 @@ abstract class Metamaterial
      * @param   Callable|boolean $function_to_check optional function to check for existing filter for
      * @return  int|boolean priority of the filter if it exists for the given function, or boolean if any filter exists for the given tag if no $function_to check ias provided.
      */
-	public function has_filter($tag, $function_to_check = FALSE)
+	public function hasFilter($tag, $function_to_check = FALSE)
 	{
-		$tag = $this->get_filter_tag($tag);
+		$tag = $this->getFilterTag($tag);
 		return has_filter($tag, $function_to_check);
 	}
 
@@ -1143,10 +1053,10 @@ abstract class Metamaterial
      * @param    $value
      * @return mixed
      */
-	public function apply_filters($tag, $value)
+	public function applyFilters($tag, $value)
 	{
 		$args = func_get_args();
-		$args[0] = $this->get_filter_tag($tag);
+		$args[0] = $this->getFilterTag($tag);
 		return call_user_func_array('apply_filters', $args);
 	}
 
@@ -1163,12 +1073,33 @@ abstract class Metamaterial
      * @param int $accepted_args
      * @return bool
      */
-	public function remove_filter($tag, $function_to_remove, $priority = 10, $accepted_args = 1)
+	public function removeFilter($tag, $function_to_remove, $priority = 10, $accepted_args = 1)
 	{
-		$tag = $this->get_filter_tag($tag);
+		$tag = $this->getFilterTag($tag);
 		return remove_filter($tag, $function_to_remove, $priority, $accepted_args);
 	}
 
+
+    public function addDefaultActions(){
+
+        $actions = array(
+            'save'=>3,
+            'head'=>1,
+            'foot'=>1,
+            'init'=>1
+        );
+
+        foreach ($actions as $action => $args)
+        {
+            $var = 'get_' . $action . '_action';
+            $actn = $this->$var();
+
+            if (!empty($actn))
+            {
+                $this->addAction($action, $actn, 10, $args);
+            }
+        }
+    }
 	/**
 	 * Used to properly prefix an action tag, making the tag is unique to this metabox instance
 	 *
@@ -1177,7 +1108,7 @@ abstract class Metamaterial
 	 * @param	string $tag name of the action
 	 * @return	string uniquely prefixed tag name
 	 */
-	protected function get_action_tag($tag)
+	protected function getActionTag($tag)
 	{
 		$prefix = 'metamaterial_action_' . $this->id . '_';
 		$prefix = preg_replace('/_+/', '_', $prefix);
@@ -1198,14 +1129,14 @@ abstract class Metamaterial
      * @param bool $suffixes
      * @param bool $once
      */
-    protected function addAction($tag, $function_to_add, $priority = 10, $accepted_args = 1, $prefix = TRUE, $suffixes = FALSE, $once = TRUE)
+    public function addAction($tag, $function_to_add, $priority = 10, $accepted_args = 1, $prefix = TRUE, $suffixes = FALSE, $once = TRUE)
 	{
         if($suffixes && empty($suffixes)){
             $suffixes = static::$admin_targets;
         }
 
         if($prefix){
-            $tag = $this->get_action_tag($tag);
+            $tag = $this->getActionTag($tag);
         }
 
         if (!empty($suffixes) && is_array($suffixes)) {
@@ -1233,9 +1164,9 @@ abstract class Metamaterial
 	 *
 	 * @return bool|int
 	 */
-	public function has_action($tag, $function_to_check = FALSE)
+	public function hasAction($tag, $function_to_check = FALSE)
 	{
-		$tag = $this->get_action_tag($tag);
+		$tag = $this->getActionTag($tag);
 		return has_action($tag, $function_to_check);
 	}
 
@@ -1252,9 +1183,9 @@ abstract class Metamaterial
 	 *
 	 * @return bool
 	 */
-	public function remove_action($tag, $function_to_remove, $priority = 10, $accepted_args = 1)
+	public function removeAction($tag, $function_to_remove, $priority = 10, $accepted_args = 1)
 	{
-		$tag = $this->get_action_tag($tag);
+		$tag = $this->getActionTag($tag);
 		return remove_action($tag, $function_to_remove, $priority, $accepted_args);
 	}
 
@@ -1269,10 +1200,10 @@ abstract class Metamaterial
 	 *
 	 * @return mixed
 	 */
-	public function do_action($tag, $arg = '')
+	public function doAction($tag, $arg = '')
 	{
 		$args = func_get_args();
-		$args[0] = $this->get_action_tag($tag);
+		$args[0] = $this->getActionTag($tag);
 		return call_user_func_array('do_action', $args);
 	}
 
@@ -1284,7 +1215,7 @@ abstract class Metamaterial
 	 * @access	private
 	 * @return	bool if this is a target admin page
 	 */
-	protected static function is_target_admin()
+	protected static function isTargetAdmin()
 	{
         global $hook_suffix;
 
@@ -1300,48 +1231,7 @@ abstract class Metamaterial
 	 */
 	public abstract function can_output();
 
-    /**
-     *
-     * @param bool $sort
-     *
-	 * @return Metamaterial[]
-     */
-    final public static function get_showing( $sort = TRUE )
-    {
-        if(!is_null(self::$allshowing) && $sort){
-            return self::$allshowing;
-        }
 
-        $showing = array();
-        $priority=array();
-        $title = array();
-        foreach (self::$instances as $inst) {
-            /** @var $inst Metamaterial[] */
-            if(reset($inst)->is_target_admin()){
-                foreach ($inst as $id => $mm) {
-                    if($mm->can_output()){
-                        $showing[$id] = $mm;
-                        if($sort){
-                            $context[$id] = $mm->get_context(TRUE) + 1;
-                            $priority[$id] = $mm->get_priority(TRUE);
-                            $title[$id] = $mm->get_title();
-                        }
-                    }
-                }
-            }
-        }
-        if(count($showing)>0){
-		if($sort){
-            array_multisort( $context, SORT_ASC, SORT_NUMERIC, $priority, SORT_DESC, SORT_NUMERIC, $title, SORT_ASC, SORT_STRING, $showing);
-        }
-        }
-        if($sort){
-            self::$allshowing = $showing;
-            return self::$allshowing;
-        }else{
-            return $showing;
-        }
-    }
 
 	/**
 	 * @return array
@@ -1457,7 +1347,7 @@ abstract class Metamaterial
 	{
 
 		// must be a targeted admin page
-		if (!self::is_target_admin()) {
+		if (!self::isTargetAdmin()) {
 			return false;
 		}
 		$script = $this->get_asset_url($this->get_global_script_name());
@@ -1481,7 +1371,7 @@ abstract class Metamaterial
     {
         $style='';
 
-        $showing = self::get_showing();
+        $showing = self::getShowing();
 
         if(empty($showing)){
 			return '';
@@ -2577,36 +2467,4 @@ abstract class Metamaterial
         }
 	}
 
-    /**
-     * @param bool $return
-     * @return null|string
-     */
-	public static function listInstances($return=false){
-
-        $str='';
-
-        foreach(self::$instances as $k => $v){
-            $str .= "\r\n" . ($k) . "\r\n";
-            foreach($v as $mm){
-                $str .= ('     ' . get_class($mm)) . "\r\n";
-            }
-        }
-
-        if($return){
-            return $str;
-        }else{
-            echo($str);
-            return null;
-        }
-    }
-
-    /**
-     *
-     */
-    final public static function purgeInstances(){
-
-        self::$instances = array();
-        self::$registeredAliases = array();
-
-    }
 }
