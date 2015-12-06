@@ -1,46 +1,25 @@
 <?php
 
 
-use HaddowG\MetaMaterial\Metamaterial;
+use HaddowG\MetaMaterial\MM_Minimal;
 use HaddowG\MetaMaterial\Facades\MMM;
 
 
 class MetaMaterialTest extends MetaMaterialTestCase {
 
 
-    public function setUp(){
-        parent::setUp();
-    }
-
-    public function tearDown() {
-        parent::tearDown();
-    }
-
-
-    function test_getInstance_throwsException_whenNoTypeProvided() {
-        $this->setExpectedException('\HaddowG\MetaMaterial\MM_Exception',null ,500);
-        /** @noinspection PhpUnusedLocalVariableInspection */
-        $mm = Metamaterial::getInstance('test',self::$MINIMAL_CONF);
-
-    }
-
-    function test_getInstance_returnsCorrectInstance_whenTypeProvided() {
-        $mm = Metamaterial::getInstance('test',self::$MINIMAL_CONF,'HaddowG\MetaMaterial\MM_Minimal');
-        $this->assertInstanceOf('HaddowG\MetaMaterial\MM_Minimal',$mm);
-    }
-
     function test_getInstance_throwsException_whenPassingConfigToExistingInstance(){
         $this->setExpectedException('\HaddowG\MetaMaterial\MM_Exception',null ,500);
         /** @noinspection PhpUnusedLocalVariableInspection */
-        $mm = Metamaterial::getInstance('test',self::$MINIMAL_CONF,'HaddowG\MetaMaterial\MM_Minimal');
+        $mm = MM_Minimal::getInstance('test',self::$MINIMAL_CONF);
         /** @noinspection PhpUnusedLocalVariableInspection */
-        $mm2 = Metamaterial::getInstance('test',array('anything'=>true),'HaddowG\MetaMaterial\MM_Minimal');
+        $mm2 = MM_Minimal::getInstance('test',array('anything'=>true));
 
     }
 
     function test_getInstance_returnsCorrectInstance_forExistingID(){
-        $mm = Metamaterial::getInstance('test',array(),'HaddowG\MetaMaterial\MM_Minimal');
-        $mm2 = Metamaterial::getInstance('test',array(),'HaddowG\MetaMaterial\MM_Minimal');
+        $mm = MM_Minimal::getInstance('test',array());
+        $mm2 = MM_Minimal::getInstance('test',array());
         $this->assertEquals($mm,$mm2);
 
     }
@@ -52,14 +31,14 @@ class MetaMaterialTest extends MetaMaterialTestCase {
             $mm =  Mockery::mock('HaddowG\MetaMaterial\MM_Minimal')->shouldAllowMockingProtectedMethods();
             $mm->shouldReceive('initInstanceActions')->andReturn(true);
             $mm->shouldReceive('applyConfig')->andReturn(true);
-            $mm->shouldReceive('applyBaseConfig')->with('test',['foobar'=>'boofar'])->once()->andReturn(true);
+            $mm->shouldReceive('applyBaseConfig')->with('test',array('foobar'=>'boofar'))->once()->andReturn(true);
             return $mm;
         });
 
-        WP_Mock::onFilter( 'metamaterial_filter_test_before_config' )->with([],'test')->reply(['foobar'=>'boofar']);
+        WP_Mock::onFilter( 'metamaterial_filter_test_before_config' )->with(array(),'test')->reply(array('foobar'=>'boofar'));
 
         /** @noinspection PhpUnusedLocalVariableInspection */
-        $mm = Metamaterial::getInstance('test', array(), 'HaddowG\MetaMaterial\MM_Minimal');
+        $mm = MM_Minimal::getInstance('test', array());
 
 
     }
@@ -74,7 +53,7 @@ class MetaMaterialTest extends MetaMaterialTestCase {
             return $mm;
         });
         /** @noinspection PhpUnusedLocalVariableInspection */
-        $mm = Metamaterial::getInstance('test', array(), 'HaddowG\MetaMaterial\MM_Minimal');
+        $mm = MM_Minimal::getInstance('test', array());
 
 
     }
@@ -89,7 +68,7 @@ class MetaMaterialTest extends MetaMaterialTestCase {
             return $mm;
         });
         /** @noinspection PhpUnusedLocalVariableInspection */
-        $mm = Metamaterial::getInstance('test', array(), 'HaddowG\MetaMaterial\MM_Minimal');
+        $mm = MM_Minimal::getInstance('test', array());
 
     }
 
@@ -103,7 +82,7 @@ class MetaMaterialTest extends MetaMaterialTestCase {
             return $mm;
         });
         /** @noinspection PhpUnusedLocalVariableInspection */
-        $mm = Metamaterial::getInstance('test', array(), 'HaddowG\MetaMaterial\MM_Minimal');
+        $mm = MM_Minimal::getInstance('test', array());
 
     }
 
@@ -112,15 +91,17 @@ class MetaMaterialTest extends MetaMaterialTestCase {
         WP_Mock::wpFunction('has_action');
 
         $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal[addAction]')->shouldAllowMockingProtectedMethods();
-        $mm->shouldReceive('addAction')->with('admin_head', 'HaddowG\MetaMaterial\Metamaterial::globalHead', 10, 1, FALSE, FALSE)->times(1);
-        $mm->shouldReceive('addAction')->with('admin_footer', 'HaddowG\MetaMaterial\Metamaterial::globalFoot', 10, 1, FALSE, FALSE)->times(1);
-        $mm->shouldReceive('addAction')->with('current_screen', 'HaddowG\MetaMaterial\Metamaterial::globalInit', 10, 1, FALSE, FALSE)->times(1);
-        $mm->shouldReceive('addAction')->with('admin_head', Mockery::on(function($callback) use ($mm){
-                return ($callback[0] === $mm && $callback[1]==='head');
-        }),11,1,FALSE,TRUE)->times(1);
-        $mm->shouldReceive('addAction')->with('admin_footer', Mockery::on(function($callback) use ($mm){
-            return ($callback[0] === $mm && $callback[1]==='foot');
-        }),11,1,FALSE,TRUE)->times(1);
+        $mm->shouldReceive('addAction')->with('admin_enqueue_scripts', 'HaddowG\MetaMaterial\Facades\MMM::globalEnqueue', 10, 1, FALSE, FALSE)->times(1);
+        $mm->shouldReceive('addAction')->with('admin_enqueue_scripts', 'HaddowG\MetaMaterial\Facades\MMM::enqueue', 10, 1, FALSE, FALSE)->times(1);
+
+        $mm->shouldReceive('addAction')->with('admin_print_styles', 'HaddowG\MetaMaterial\Facades\MMM::printGlobalStyles', 10, 1, FALSE, FALSE)->times(1);
+
+
+        $mm->shouldReceive('addAction')->with('admin_head', 'HaddowG\MetaMaterial\Facades\MMM::head', 11, 1, FALSE, FALSE)->times(1);
+        $mm->shouldReceive('addAction')->with('admin_footer', 'HaddowG\MetaMaterial\Facades\MMM::foot', 11, 1, FALSE, FALSE)->times(1);
+
+        $mm->shouldReceive('addAction')->with('current_screen','HaddowG\MetaMaterial\Facades\MMM::globalInit', 10, 1, FALSE, FALSE)->times(1);
+
 
         $method = new ReflectionMethod('HaddowG\MetaMaterial\MM_Minimal', 'initInstanceActions');
         $method->setAccessible(true);
@@ -135,7 +116,7 @@ class MetaMaterialTest extends MetaMaterialTestCase {
         $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal[addAction]')->shouldAllowMockingProtectedMethods();
         $mm->shouldReceive('addAction')->andReturn(true);
 
-        WP_Mock::expectActionAdded('admin_init', array($mm, 'prep'));
+        WP_Mock::expectActionAdded('admin_init', array($mm, 'initAlways'));
 
         $method = new ReflectionMethod('HaddowG\MetaMaterial\MM_Minimal', 'initInstanceActions');
         $method->setAccessible(true);
@@ -204,7 +185,7 @@ class MetaMaterialTest extends MetaMaterialTestCase {
         $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal[getTemplatePath]');
         $mm->shouldReceive('getTemplatePath')->andReturn(true);
 
-        $conf = [];
+        $conf = array();
         $mm->applyBaseConfig('test', $conf);
         $this->assertEquals('test',$mm->get_the_id());
 
@@ -219,10 +200,10 @@ class MetaMaterialTest extends MetaMaterialTestCase {
         $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal[getTemplatePath]');
         $mm->shouldReceive('getTemplatePath')->andReturn(true);
 
-        $conf = [];
+        $conf = array();
         $mm->applyBaseConfig('test', $conf);
 
-        $expected = [
+        $expected = array(
             'title',
             'template',
             'context',
@@ -238,7 +219,7 @@ class MetaMaterialTest extends MetaMaterialTestCase {
             'save_action',
             'head_action',
             'foot_action'
-        ];
+        );
 
         foreach($expected as $k){
             $this->assertArrayHasKey($k,$conf);
@@ -251,7 +232,7 @@ class MetaMaterialTest extends MetaMaterialTestCase {
         $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal[getTemplatePath]');
         $mm->shouldReceive('getTemplatePath')->andReturn(true);
 
-        $conf = [
+        $conf = array(
             'title' => 'foobar_title',
             'template' => 'foobar_template',
             'context' => 'foobar_context',
@@ -267,7 +248,7 @@ class MetaMaterialTest extends MetaMaterialTestCase {
             'save_action' => 'foobar_save_action',
             'head_action' => 'foobar_head_action',
             'foot_action' => 'foobar_foot_action'
-        ];
+        );
 
         $mm->applyBaseConfig('test',$conf);
 
@@ -285,14 +266,14 @@ class MetaMaterialTest extends MetaMaterialTestCase {
         $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal[getTemplatePath]');
         $mm->shouldReceive('getTemplatePath')->andReturn(true);
 
-        $conf = [
+        $conf = array(
             'not_allowed'=>'foobar',
             'another_thing'=>'boofar'
-        ];
-        $not_expected = [
+        );
+        $not_expected = array(
             'not_allowed',
             'another_thing'
-        ];
+        );
 
         $mm->applyBaseConfig('test',$conf);
 
@@ -306,29 +287,8 @@ class MetaMaterialTest extends MetaMaterialTestCase {
     public function testApplyBaseConfig_callsGetTemplatePath(){
         $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal[getTemplatePath]');
         $mm->shouldReceive('getTemplatePath')->once()->andReturn(true);
-        $conf=[];
+        $conf= array();
         $mm->applyBaseConfig('test',$conf);
-
-    }
-
-    public function testApplyBaseConfig_setsStaticCompoundHide_ifProvided(){
-
-        $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal[getTemplatePath]');
-        $mm->shouldReceive('getTemplatePath')->andReturn(true);
-
-        $class = new ReflectionClass('HaddowG\MetaMaterial\Metamaterial');
-        $ch = $class->getProperty('compound_hide');
-        $ch->setAccessible(true);
-        $ch->setValue($mm,true);
-
-        $conf=['compound_hide'=>false];
-        $mm->applyBaseConfig('test',$conf);
-
-        $this->assertFalse($ch->getValue($mm));
-
-        $conf=['compound_hide'=>true];
-        $mm->applyBaseConfig('test',$conf);
-        $this->assertTrue($ch->getValue($mm));
 
     }
 
@@ -391,26 +351,8 @@ class MetaMaterialTest extends MetaMaterialTestCase {
 
     }
 
-    public function testGetTemplatePath_checksTemplatesDirectoryIfProvided(){
-        WP_Mock::wpFunction('trailingslashit',['return_arg' => 0]);
-        WP_Mock::wpFunction('get_stylesheet_directory');
-
-        $class = new ReflectionClass('HaddowG\MetaMaterial\Metamaterial');
-        $template = $class->getProperty('template');
-        $template->setAccessible(true);
-        $templates_dir = $class->getProperty('templates_dir');
-        $templates_dir->setAccessible(true);
-
-        $mm = new HaddowG\MetaMaterial\MM_Minimal();
-        $template->setValue($mm,'empty.php');
-        $templates_dir->setValue($mm, dirname(dirname(__FILE__)) . '/support/templates/');
-
-        $this->assertEquals(dirname(dirname(__FILE__)). '/support/templates/empty.php',$mm->getTemplatePath());
-
-    }
-
     public function testGetTemplatePath_checksDefaultTemplatesDirectoryIfProvided(){
-        WP_Mock::wpFunction('trailingslashit',['return_arg' => 0]);
+        WP_Mock::wpFunction('trailingslashit', array('return_arg' => 0));
         WP_Mock::wpFunction('get_stylesheet_directory');
 
         $class = new ReflectionClass('HaddowG\MetaMaterial\Metamaterial');
@@ -428,8 +370,8 @@ class MetaMaterialTest extends MetaMaterialTestCase {
     }
 
     public function testGetTemplatePath_checksThemeDirectory(){
-        WP_Mock::wpFunction('trailingslashit',['return_arg' => 0]);
-        WP_Mock::wpFunction('get_stylesheet_directory',['return'=>dirname(dirname(__FILE__)) . '/support/templates/']);
+        WP_Mock::wpFunction('trailingslashit', array('return_arg' => 0));
+        WP_Mock::wpFunction('get_stylesheet_directory', array('return'=>dirname(dirname(__FILE__)) . '/support/templates/'));
 
         $class = new ReflectionClass('HaddowG\MetaMaterial\Metamaterial');
         $template = $class->getProperty('template');

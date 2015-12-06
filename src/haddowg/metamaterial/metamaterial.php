@@ -1,28 +1,6 @@
 <?php
-namespace HaddowG\MetaMaterial;
-
-use stdClass;
-use WP_Embed;
-use HaddowG\MetaMaterial\Facades\MMM;
-
-if (!defined('PHP_INT_MIN')) {
-
-	/** Minimum possible value of an integer */
-	define('PHP_INT_MIN', ~PHP_INT_MAX);
-
-}
-
-
 /**
- * Class Metamaterial
- *
- * @package     MetaMaterial
- * @author      Gregory Haddow
- * @copyright   Copyright (c) 2014, Gregory Haddow, http://www.greghaddow.co.uk/
- * @license     http://opensource.org/licenses/gpl-3.0.html The GPL-3 License with additional attribution clause as detailed below.
- * @version     0.1
- * @link        http://www.greghaddow.co.uk/MetaMaterial
- *
+ * Abstract Metamaterial Class.
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +19,33 @@ if (!defined('PHP_INT_MIN')) {
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
+ * @author      Gregory Haddow <greg@greghaddow.co.uk>
+ * @copyright   Gregory Haddow, http://www.greghaddow.co.uk/
+ * @license     http://opensource.org/licenses/gpl-3.0.html The GPL-3 License with additional attribution clause as detailed below.
+ * @link        http://www.greghaddow.co.uk/MetaMaterial
+ */
+
+namespace HaddowG\MetaMaterial;
+
+use WP_Embed;
+
+use HaddowG\MetaMaterial\Facades\MMM;
+
+if (!defined('PHP_INT_MIN')) {
+
+	/** Minimum possible value of an integer */
+	define('PHP_INT_MIN', ~PHP_INT_MAX);
+
+}
+
+/**
+ * Abstract Class Metamaterial.
+ *
+ * Provides base functionality and framework for all Metamaterial types.
+ * Individual types must override the abstract methods and may extend default variables or method
+ * implementations to customize their own behaviour.
+ *
+ * @package HaddowG\MetaMaterial
  */
 abstract class Metamaterial
 {
@@ -55,12 +60,6 @@ abstract class Metamaterial
 
      /** mode option */
     const STORAGE_MODE_EXTRACT = 'extract';
-
-    /** field type hint */
-    const HINT_SELECT_MULTI = 'select_multi';
-
-    /** field type hint */
-    const HINT_CHECKBOX_MULTI = 'checkbox_multi';
 
     /** priority option numeric equivalent */
 	const PRIORITY_TOP = PHP_INT_MAX;
@@ -93,9 +92,7 @@ abstract class Metamaterial
 	 * User defined unique identifier for this instance.
 	 * Required for instantiation.
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		string identifier for this instance, required.
+	 * @var	string identifier for this instance, required.
 	 */
 	protected $id;
 
@@ -105,10 +102,7 @@ abstract class Metamaterial
      *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		string the title of the metabox
-	 * @see		$hide_title
+	 * @var	string the title of the metabox
 	 */
     protected $title = 'Custom Meta';
 
@@ -119,9 +113,7 @@ abstract class Metamaterial
 	 *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		string metabox template file, required
+	 * @var	string metabox template file, required
 	 */
     protected $template;
 
@@ -133,9 +125,7 @@ abstract class Metamaterial
      *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		string metabox page context
+	 * @var	string metabox page context
 	 */
 	protected $context = 'normal';
 
@@ -146,9 +136,7 @@ abstract class Metamaterial
      *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		string metabox priority within page context
+	 * @var	string metabox priority within page context
 	 */
 	protected $priority = 'high';
 
@@ -164,11 +152,7 @@ abstract class Metamaterial
 	 *
      * Config Option
      *
-     * @todo    maybe add a STORAGE_MODE_TABLE option to store/retrieve values from a dedicated table. would require type hinting and greater validation, how to handle nesting without serialize? nesteed set?
-	 * @since	0.1
-	 * @access	protected
-	 * @var		string either STORAGE_MODE_ARRAY or STORAGE_MODE_EXTRACT to indicate desired storage mode.
-     * @see     $meta_key, $prefix, STORAGE_MODE_ARRAY, STORAGE_MODE_EXTRACT
+     * @var string either STORAGE_MODE_ARRAY or STORAGE_MODE_EXTRACT to indicate desired storage mode.
 	 */
 	protected $mode = self::STORAGE_MODE_ARRAY;
 
@@ -179,10 +163,7 @@ abstract class Metamaterial
      *
      * Config Option
      *
-     * @since   0.1
-     * @access  protected
-     * @var     string key to use for meta storage when using STORAGE_MODE_ARRAY, or as an optional prefix for keys when using STORAGE_MODE_EXTRACT
-     * @see     $mode, $prefix, STORAGE_MODE_ARRAY, STORAGE_MODE_EXTRACT
+     * @var string key to use for meta storage when using STORAGE_MODE_ARRAY, or as an optional prefix for keys when using STORAGE_MODE_EXTRACT
      */
     protected $meta_key;
 
@@ -194,10 +175,7 @@ abstract class Metamaterial
      *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		bool whether to prefix keys when using STORAGE_MODE_EXTRACT
-     * @see     $mode, $meta_key, STORAGE_MODE_ARRAY, STORAGE_MODE_EXTRACT
+	 * @var	bool whether to prefix keys when using STORAGE_MODE_EXTRACT
 	 */
     protected $prefix = TRUE;
 
@@ -207,31 +185,24 @@ abstract class Metamaterial
      * permalink, the_content, excerpt, custom_fields, discussion, comments, slug, author,
      * format, featured_image, revisions, categories, tags, send-trackbacks
      *
-	 * If $compound_hide is set to FALSE then only the first showing metaboxes values will be considered,
+	 * If MMM::$compound_hide is set to FALSE then only the first showing metaboxes values will be considered,
      * otherwise they are combined to determine what should be hidden.
      *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		array Array of named elements to be hidden, see description for possible values.
-     * @see     $compound_hide, $hide_on_screen_styles
+	 * @var array Array of named elements to be hidden, see description for possible values.
 	 */
 	protected $hide_on_screen;
 
     /**
-     * If FALSE only the first showing metabox's $hide_on_screen values will be considered.
-     * When this is the default TRUE all showing metaboxes have their $hide_on_screen values
-     * merged to determine what should be hidden.
+     * Whether ajax saving is enabled.
+     * Enabled by default.
      *
      * Config Option
      *
-     * @since   0.1
-     * @access  private
-     * @var     boolean whether to compound $hide_on_screen values
-     * @see     $hide_on_screen
+     * @var bool whether ajax saving is enabled.
      */
-    private static $compound_hide = TRUE;
+    protected $ajax_save = true;
 
 	/**
 	 * Callback function triggered on the WordPress "current_screen" action
@@ -239,10 +210,7 @@ abstract class Metamaterial
 	 *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		callable
-     * @see     globalInit()
+	 * @var callable callable for additional initialisation of this instance
 	 */
     protected $init_action;
 
@@ -257,10 +225,7 @@ abstract class Metamaterial
 	 *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		callable see description for provided arguments and expected return
-	 * @see		prep(), can_output()
+	 * @var	callable see description for provided arguments and expected return
 	 */
     protected $output_filter;
 
@@ -274,10 +239,7 @@ abstract class Metamaterial
      *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		callable see description for provided arguments and expected return
-	 * @see		$save_action, add_filter(), globalInit()
+	 * @var	callable see description for provided arguments and expected return
 	 */
     protected $save_filter;
 
@@ -288,100 +250,99 @@ abstract class Metamaterial
      * Filter function should accept 2 arguments:
      *  - array $ajax_return array of data to be returned
      *	- int $object_id - the id of the object that was saved
+     *  - boolean $is_ajax - if the save was via an ajax request
      *
      * Config Option
      *
-     * @since	0.1
-     * @access	protected
-     * @var		callable see description for provided arguments and expected return
-     * @see		add_filter(), globalInit()
+     * @var	callable see description for provided arguments and expected return
      */
 	protected $ajax_save_success_filter;
 
-	/**
-	 * @var
-	 */
+    /**
+     * Ajax Save Fail Filter function callback used to modify ajax response on failed ajax save.
+     *
+     * Filter function should return modified array, containing at least 'message'.
+     * Filter function should accept 2 arguments:
+     *  - array $ajax_return array of data to be returned
+     *	- int $object_id - the id of the object that was saved
+     *  - boolean $is_ajax - if the save was via an ajax request
+     *
+     * Config Option
+     *
+     * @var	callable see description for provided arguments and expected return
+     */
 	protected $ajax_save_fail_filter;
 
 	/**
 	 * Callback function triggered after this metabox completes saving.
      *
-     * Callback function should accept 2 arguments:
+     * Callback function should accept 3 arguments:
      * - array $meta metabox data that was saved
 	 * - int $post_id - the post id of post metadata was saved to
+     * - boolean $is_ajax - if the save was via an ajax request
 	 *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		callable save callback
-	 * @see		$save_filter, add_filter(), globalInit()
+	 * @var	callable save callback
 	 */
     protected $save_action;
 
 	/**
 	 * Callback used to insert STYLE or SCRIPT tags into the head.
+     *
      * Callback is executed only when the metabox is present.
 	 * Called with lower than default priority so other script/style dependencies should be present if enqueued.
      *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		callable head callback for script/style inclusion
-	 * @see		head(), add_action(), globalInit()
+	 * @var	callable head callback for script/style inclusion
 	 */
     protected $head_action;
 
 	/**
 	 * Callback used to insert SCRIPT tags into the footer.
+     *
      * Callback is executed only when the metabox is present.
 	 * Called with lower than default priority so other script/style dependencies should be present if enqueued.
 	 *
      * Config Option
      *
-	 * @since	0.1
-	 * @access	protected
-	 * @var		callable foot callback for script/style inclusion
-	 * @see		foot(), add_action(), globalInit()
+	 * @var	callable foot callback for script/style inclusion
 	 */
     protected $foot_action;
 
+    /**
+     * Callback used to enqueue scripts.
+     *
+     * Callback is executed only when the metabox is present.
+     *
+     * Config Option
+     *
+     * @var	callable enqueue callback for script/style inclusion
+     */
+    protected $enqueue_action;
 
 	/**
-	 * @var string url for assets loaded by this Metamaterial instance
-	 */
-	protected $assets_url = false;
-
-	/**
-	 * @var string default url for assets loaded by this Metamaterial instance
+     * Defines the default asset url where assets for this metamaterial type can be located.
+     *
+	 * @var string default url for assets loaded by this Metamaterial class
 	 */
 	public static $default_assets_url = false;
 
-	/**
-	 * @var string path for assets loaded by this Metamaterial instance
-	 */
-	protected $assets_dir = false;
-
-	/**
-	 * @var string default path for assets loaded by this Metamaterial instance
+    /**
+     * Defines the default asset file path where assets for this metamaterial type can be located.
+     *
+	 * @var string default path for assets loaded by this Metamaterial class
 	 */
 	public static $default_assets_dir = false;
 
     /**
+     * Defines the default template file path where assets for this metamaterial type can be located.
      *
-     * @var bool|string
+     * @var string default path for templates loaded by this Metamaterial class
      */
-    private $template_path = false;
-
-    protected $templates_dir = false;
-
     public static $default_templates_dir = false;
 
-	/**
-	 * @var bool
-	 */
-	protected $ajax_save = true;
 
     /**
      *~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*~*
@@ -390,125 +351,69 @@ abstract class Metamaterial
      */
 
     /**
+     * Cached path to this instances template file
+     * @var bool|string
+     */
+    protected $template_path = false;
+
+    /**
 	 * Cached value of can_output(), to prevent re-execution.
-	 *
-	 * @since	0.1
-	 * @access	private
-	 * @var		string
+	 * @var	string
 	 */
     protected $will_show = null;
 
     /**
 	 * Cached value of meta(), to prevent re-execution internally.
-	 *
-	 * @since	0.1
-	 * @access	private
-	 * @var		array
-     * @see     meta()
+     * @var	array
 	 */
 	protected $meta  = array();
 
     /**
      * Stores current field name in template
      *
-     * @since   0.1
-     * @access  private
-     * @var     string current field name
-     * @see     the_name(), get_the_name()
+     * @var string current field name
      */
-	private $name;
+	protected $name;
 
 	/**
 	 * Used to provide field type hinting
 	 *
-	 * @since	0.1
-	 * @access	private
-	 * @var		string
-	 * @see		the_field(), HINT_CHECKBOX_MULTI, HINT_SELECT_MULTI
-	 */
-	private $hint;
-
-    /**
-     * Stores length of current loop in template
-     *
-     * @since   0.1
-     * @access  private
-     * @var     int length of current loop
+	 * @var	string
      */
-	private $length = 0;
-
-    /**
-     * Stores current index within current loop in template
-     *
-     * @since   0.1
-     * @access  private
-     * @var     int current index within current loop
-     */
-	private $current = -1;
-
-    /**
-     * If we are currently in a loop in the template
-     *
-     * @since   0.1
-     * @access  private
-     * @var     boolean If we are currently in a loop in the template
-     */
-	private $in_loop = FALSE;
+	protected $is_multi;
 
     /**
      * If we are currently in a template
      *
-     * @since   0.1
-     * @access  private
-     * @var     boolean If we are currently in a template
+     * @var boolean If we are currently in a template
      */
 	protected $in_template = FALSE;
 
     /**
      * Html group tag for current loop
      *
-     * @since   0.1
-     * @access  private
-     * @var     string Html group tag for current loop
+     * @var string Html group tag for current loop
      */
-	private $group_tag;
+	protected $group_tag;
 
     /**
      * Html loop tag for current loop container
      *
-     * @since   0.1
-     * @access  private
-     * @var     string Html loop tag for current loop
+     * @var string Html loop tag for current loop
      */
-    private $loop_tag;
-
-	/**
-	 * Used to store current loop details, cleared after loop ends
-	 *
-	 * @since	0.1
-	 * @access	private
-	 * @var		stdClass
-	 * @see		have_fields_and_multi(), have_fields()
-	 */
-	private $loop_data;
+    protected $loop_tag;
 
     /**
 	 * Used to store loop stack for
 	 *
-	 * @since	0.1
-	 * @access	private
-	 * @var		array of MM_Loop objects indexed by group name/id
-	 * @see		MM_Loop
+	 * @var array of MM_Loop objects indexed by group name/id
 	 */
-    private $loop_stack = array();
+    protected $loop_stack = array();
 
     /**
      * Array of admin page targets on which this MetaMaterial Class is designed to display.
      *
-     * @since   0.1
-     * @access  protected
-     * @var     array Array of admin page targets on which this MetaMaterial Class is designed to display
-     * @see     isTargetAdmin()
+     * @var array Array of admin page targets on which this MetaMaterial Class is designed to display
      */
     protected static $admin_targets = array();
 
@@ -518,60 +423,64 @@ abstract class Metamaterial
      * Used to order metaboxes within a page context.
      * Plugin/Theme developers should avoid default use of 'top' or 'high' to allow end users to more easily adjust as desired.
      *
-     * @since   0.1
-     * @access  protected
-     * @var     array Array of priorities with numerical equivalents.
-     * @see     isTargetAdmin()
+     * @var array Array of priorities with numerical equivalents.
      */
 	protected static $priorities = array(
-									'top' => self::PRIORITY_TOP,
-									'high' => self::PRIORITY_HIGH,
-									'core' => self::PRIORITY_CORE,
-									'default' => self::PRIORITY_DEFAULT,
-									'low' => self::PRIORITY_LOW,
-									'bottom' => self::PRIORITY_BOTTOM );
+        'top' => self::PRIORITY_TOP,
+        'high' => self::PRIORITY_HIGH,
+        'core' => self::PRIORITY_CORE,
+        'default' => self::PRIORITY_DEFAULT,
+        'low' => self::PRIORITY_LOW,
+        'bottom' => self::PRIORITY_BOTTOM
+    );
 
     /**
      * Array of contexts in order that they are displayed.
      * Used to order metaboxes within a page context.
      * Plugin/Theme developers should avoid default use of 'top' or 'high' to allow end users to more easily adjust as desired.
      *
-     * @since   0.1
-     * @access  protected
      * @var     array Array of priorities with numerical equivalents.
-     * @see     isTargetAdmin()
      */
     protected static $contexts = array(
-									'normal',
-                                    'advanced',
-                                    'side');
+        'normal',
+        'advanced',
+        'side'
+    );
 
 	/**
+     * An associative array of css styles that can used to hide components on the admin screen
+     *
 	 * @var array
 	 */
-	protected static $hide_on_screen_styles = array();
+	public static $hide_on_screen_styles = array();
 
 
     /**
      * Initializes generic action hooks for a Metamaterial instance
      * Some are global and only bound once for any number of metamaterial instances, others are per instance, in both
      * cases they are run regardless of whether an instance is active on the current page.
+     *
+     * @param $id
+     * @param array $config
+     * @return Metamaterial
+     * @throws MM_Exception
      */
-
-
-	public static function getInstance($id, $config = array(),$class=NULL)
+    public static function getInstance($id, $config = array())
     {
+        $class = get_called_class();
+
         $is_new =!MMM::hasInstance($id,$class);
 
+        /** @var $instance MetaMaterial */
         $instance = MMM::getInstance($id,$class);
 
         if($is_new){
 
-            $config = apply_filters('metamaterial_filter_' . $id . '_before_config',$config,$id);
+            $config = $instance->applyFilters('before_config', $config, $id);
 
             $instance->applyBaseConfig($id,$config);
 
-            $instance->applyConfig($id,$config);
+            $instance->applyConfig($config);
 
             $instance->initInstanceActions();
         }else{
@@ -582,25 +491,29 @@ abstract class Metamaterial
 
         return $instance;
 
-
     }
 
-
+    /**
+     * Setup wordpress action hooks for this instance
+     *
+     * Sets up the wordpress hooks required to power any metamaterial instance, including several global hooks
+     * bound once no matter how many instances or types of Metamaterial are added.
+     */
     protected function initInstanceActions(){
 
         //these are added only once, the first time a MetaMaterial is constructed, therefore they run only once for all instances.
-        $this->addAction('admin_head', 'HaddowG\MetaMaterial\Metamaterial::globalHead', 10, 1, FALSE, FALSE);
-        $this->addAction('admin_footer', 'HaddowG\MetaMaterial\Metamaterial::globalFoot', 10, 1, FALSE, FALSE);
+        $this->addAction('admin_enqueue_scripts', 'HaddowG\MetaMaterial\Facades\MMM::globalEnqueue', 10, 1, FALSE, FALSE);
+        $this->addAction('admin_enqueue_scripts', 'HaddowG\MetaMaterial\Facades\MMM::enqueue', 10, 1, FALSE, FALSE);
+        $this->addAction('admin_print_styles', 'HaddowG\MetaMaterial\Facades\MMM::printGlobalStyles', 10, 1, FALSE, FALSE);
+        $this->addAction('admin_head', 'HaddowG\MetaMaterial\Facades\MMM::head', 11, 1, FALSE, FALSE);
+        $this->addAction('admin_footer', 'HaddowG\MetaMaterial\Facades\MMM::foot', 11, 1, FALSE, FALSE);
+        $this->addAction('current_screen', 'HaddowG\MetaMaterial\Facades\MMM::globalInit' ,10,1,FALSE,FALSE);
+
 
         //register output filters on 'admin_init' so they are available before globalInit() runs on the 'current_screen' hook.
-        add_action('admin_init', array($this,'prep'));
+        add_action('admin_init', array($this,'initAlways'));
 
-        //this is added only once the first time a MetaMaterial is constructed, therefore runs only once for all instances.
-        $this->addAction('current_screen', 'HaddowG\MetaMaterial\Metamaterial::globalInit',10,1,FALSE,FALSE);
-
-        //header and footer actions will be fired only for target admin pages
-        $this->addAction('admin_head', array($this, 'head'), 11, 1, FALSE, TRUE);
-        $this->addAction('admin_footer', array($this,'foot'), 11, 1, FALSE, TRUE);
+        //if ajax save is enabled this needs to be available regardless of the admin page
         if($this->ajax_save){
             add_action('wp_ajax_' . $this->getActionTag('ajax_save'), array($this, 'ajax_save'));
         }
@@ -608,11 +521,11 @@ abstract class Metamaterial
 
     /**
      * Applies generic configuration options for all Metamaterial instances.
-     * Ensures template is set, throes exception if not.
+     * Throws exception if invalid array is provided.
+     *
      * @param $id
      * @param $config
      * @throws MM_Exception
-     * @see getTemplatePath()
      */
     public function applyBaseConfig($id, &$config)
     {
@@ -620,7 +533,6 @@ abstract class Metamaterial
         if (is_array($config)) {
 
             $this->id = $id;
-            $this->loop_data = new stdClass();
 
             $config_defaults = array
             (
@@ -637,16 +549,22 @@ abstract class Metamaterial
                 'output_filter' => $this->output_filter,
                 'save_filter' => $this->save_filter,
                 'save_action' => $this->save_action,
+                'enqueue_action' => $this->enqueue_action,
                 'head_action' => $this->head_action,
                 'foot_action' => $this->foot_action
             );
 
-            if (isset($config['compound_hide'])) {
-                self::$compound_hide = (boolean) $config['compound_hide'];
-            }
-
             //discard non config options and merge with defaults
             $config = array_merge($config_defaults, array_intersect_key($config, $config_defaults));
+
+            $prep_arrays = array(
+                'hide_on_screen'
+            );
+
+            foreach ($prep_arrays as $v)
+            {
+                $this->$v = static::ensureArray($this->$v);
+            }
 
             //set instance config options
             foreach ($config as $n => $v) {
@@ -654,7 +572,7 @@ abstract class Metamaterial
             }
 
             //resolve and cache template path
-            $this->getTemplatePath();
+            $this->template_path = $this->applyFilters('template_path',$this->getTemplatePath());
 
 
         }else{
@@ -666,14 +584,18 @@ abstract class Metamaterial
      * Resolves provided template to an absolute path to an existing file and throws exception if it cant.
      * Attempts to resolve in the current order:
      *      - template option as provided (i.e check if already absolute path)
-     *      - relative to the template_path option if provided
-     *      - relative to the default_templates_dir if defined
      *      - relative to the active theme directory
+     *      - relative to the default_templates_dir if defined
      *
      * @return string the resolved absolute path to the template
      * @throws MM_Exception
      */
     public function getTemplatePath(){
+
+        //return cached path if present
+        if($this->template_path){
+            return $this->template_path;
+        }
 
         //abort if we dont have a template option set
         if(empty($this->template)){
@@ -685,26 +607,19 @@ abstract class Metamaterial
             }
         }
 
-        //return cached path if present
-        if($this->template_path){
-            return $this->template_path;
-        }
-
         //see if provided template option is an absolute path to existing file.
         if(file_exists($this->template)) {
             $this->template_path = $this->template;
             return $this->template_path;
         }
 
-        //next try relative to template directory option if provided
-        if($this->templates_dir){
-            if(file_exists(trailingslashit($this->templates_dir) . $this->template)) {
-                $this->template_path = trailingslashit($this->templates_dir) . $this->template;
-                return $this->template_path;
-            }
+        //first try relative the the current theme directory
+        if( file_exists(trailingslashit( get_stylesheet_directory()) . $this->template )){
+            $this->template_path = trailingslashit( get_stylesheet_directory()) . $this->template;
+            return $this->template_path;
         }
 
-        //next try relative to the default templates directory
+        //lastly try relative to the default templates directory
         if(static::$default_templates_dir) {
             if ( file_exists( trailingslashit(static::$default_templates_dir) . $this->template ) ) {
                 $this->template_path = trailingslashit(static::$default_templates_dir)  . $this->template;
@@ -712,20 +627,14 @@ abstract class Metamaterial
             }
         }
 
-        //lastly try relative the the current theme directory
-        if( file_exists(trailingslashit( get_stylesheet_directory()) . $this->template )){
-            $this->template_path = trailingslashit( get_stylesheet_directory()) . $this->template;
-            return $this->template_path;
-        }
-
         //if we haven't found any match throw exception
         throw new MM_Exception('Unable to locate template file, please ensure path and filename are correct.',500);
     }
 
 	/**
-	 * Simple accessor for this metaboxes title
+	 * print this metaboxes title
 	 */
-	public function theTitle(){
+	public function the_title(){
 		echo $this->title;
 	}
 
@@ -734,7 +643,7 @@ abstract class Metamaterial
      *
      * @return	string the metaboxes title
      */
-    public function getTitle(){
+    public function get_the_title(){
         return $this->title;
     }
 
@@ -808,7 +717,6 @@ abstract class Metamaterial
 	 * Simple accessor for this metaboxes save_filter
 	 *
 	 * @return	callable|null the metaboxes save_filter
-	 * @see		save(), add_filter()
 	 */
     public function get_save_filter(){
         return $this->save_filter;
@@ -834,10 +742,7 @@ abstract class Metamaterial
 	/**
 	 * Simple accessor for this metaboxes save_action
 	 *
-	 * @since   0.1
-     * @access  public
 	 * @return	callable|null the metaboxes save_action
-	 * @see		$save_action, save(), add_action()
 	 */
     public function get_save_action(){
         return $this->save_action;
@@ -846,10 +751,7 @@ abstract class Metamaterial
 	/**
 	 * Simple accessor for this metaboxes head_action
 	 *
-	 * @since   0.1
-     * @access  public
 	 * @return	callable|null the metaboxes head_action
-	 * @see		$head_action, head(), add_action()
 	 */
     public function get_head_action(){
         return $this->head_action;
@@ -858,10 +760,7 @@ abstract class Metamaterial
 	/**
 	 * Simple accessor for this metaboxes foot_action
 	 *
-	 * @since   0.1
-     * @access  public
 	 * @return	callable|null the metaboxes foot_action
-	 * @see		$foot_action, foot(), add_action()
 	 */
     public function get_foot_action(){
         return $this->foot_action;
@@ -870,50 +769,50 @@ abstract class Metamaterial
 	/**
 	 * Simple accessor for this metaboxes init_action
 	 *
-	 * @since   0.1
-     * @access  public
 	 * @return	callable|null the metaboxes init_action
-	 * @see		$init_action, globalInit(), add_action()
 	 */
     public function get_init_action(){
         return $this->init_action;
     }
 
+	/**
+	 * Simple accessor for this metaboxes enqueue_action
+	 *
+	 * @return	callable|null the metaboxes enqueue_action
+	 */
+	public function get_enqueue_action(){
+		return $this->enqueue_action;
+	}
+
     /**
      * Apply config options specific to the Metamaterial concrete class.
      *
-     * @param $id string the metabox id
      * @param $config array the config array (will contain merged default values at this point)
      */
-    protected abstract function applyConfig($id,&$config);
+    protected abstract function applyConfig($config);
 
 	/**
-     *
-	 * @return mixed
+     * Initialises this metamaterial instance when it is showing on the current admin page.
 	 */
-	public abstract function init();
+	public abstract function initWhenShowing();
 
 	/**
-	 * @return mixed
+	 * Initialises this metamaterial class once regardless of how many instances may exist.
 	 */
 	public static function initOnce(){
         // no default behaviour override in extending class to use.
     }
 
-
-
 	/**
-	 * Used to initialize the metabox's output filter, runs on WordPress admin_init action.
+	 * Initialises this metamaterial instance regardless of whether it is showing on the current admin page
+     * Used to initialize the metabox's output filter, runs on WordPress admin_init action.
 	 * This runs before the globalInit() runs on the current_screen action to ensure we can
 	 * correctly determine if a box should be showing or not.
-	 *
-	 * @since	0.1
-	 * @access	public
 	 */
-	public function prep()
+	public function initAlways()
 	{
-
-		if ( ! empty($this->output_filter))
+        //add output filter if configured
+		if ( !empty($this->output_filter) )
 		{
 			$this->addFilter('output', $this->output_filter,10,3);
 		}
@@ -923,49 +822,40 @@ abstract class Metamaterial
 	/**
 	 * Used to insert STYLE or SCRIPT tags into the head.
 	 * called on WordPress admin_head action.
-	 *
-	 * @since	0.1
-	 * @access	public
-	 * @see		$head_action, foot()
 	 */
 	public function head()
 	{
-		// action: head
-		if ($this->hasAction('head'))
-		{
-			$this->doAction('head');
-		}
+        $this->doAction('head');
 	}
 
 	/**
 	 * Used to insert SCRIPT tags into the footer.
 	 * called on WordPress admin_footer action.
-	 *
-	 * @since	0.1
-	 * @access	public
-	 * @see	    $foot_action, head()
 	 */
 	public function foot()
 	{
-		// action: foot
-		if ($this->hasAction('foot'))
-		{
-			$this->doAction('foot');
-		}
+        $this->doAction('foot');
 	}
+
+    /**
+     * Used to enqueue scripts.
+     * called on wordpress admin_enqueue_scripts action.
+     */
+    public function enqueue(){
+        $this->doAction('enqueue');
+    }
 
 	/**
 	 * Render a metabox from template file.
      * Exposes global post, Metamaterial instance and meta array to template.
 	 * Appends nonce for verification.
-     *
-	 * @since	0.1
-	 * @access	protected
-	 * @see		globalInit()
 	 */
 	public abstract function render();
 
-
+    /**
+     * Add the default filters common to all metamaterial instances.
+     *
+     */
     public function addDefaultFilters(){
 
         $filters = array('save'=>3);
@@ -988,13 +878,10 @@ abstract class Metamaterial
 
     }
 
-
 	/**
 	 * Used to properly prefix filter tags.
      * Ensures filter tags are unique to this metabox instance
 	 *
-	 * @since	0.1
-	 * @access	protected
 	 * @param	string $tag name of the filter
 	 * @return	string uniquely prefixed tag name
 	 */
@@ -1012,8 +899,6 @@ abstract class Metamaterial
      * Uniquely prefixes filter tag for this instance of Metamaterial
      * see WordPress add_filter()
      *
-     * @since   0.1
-     * @access  public
      * @param   string $tag tag name for the filter
      * @param   Callable $function_to_add filter function
      * @param   int $priority filter priority
@@ -1030,8 +915,6 @@ abstract class Metamaterial
      * Uniquely prefixes filter tag for this instance of Metamaterial
      * see WordPress has_filter()
      *
-     * @since   0.1
-     * @access  public
      * @param   string $tag tag name for the filter to check for
      * @param   Callable|boolean $function_to_check optional function to check for existing filter for
      * @return  int|boolean priority of the filter if it exists for the given function, or boolean if any filter exists for the given tag if no $function_to check ias provided.
@@ -1047,10 +930,8 @@ abstract class Metamaterial
      * Uniquely prefixes filter tag for this instance of Metamaterial
      * see WordPress apply_filters()
      *
-     * @since   0.1
-     * @access  public
-     * @param    $tag
-     * @param    $value
+     * @param $tag
+     * @param $value
      * @return mixed
      */
 	public function applyFilters($tag, $value)
@@ -1065,25 +946,26 @@ abstract class Metamaterial
      * Uniquely prefixes filter tag for this instance of Metamaterial
      * see WordPress remove_filter()
      *
-     * @since   0.1
-     * @access  public
-     * @param    $tag
-     * @param    $function_to_remove
+     * @param $tag
+     * @param $function_to_remove
      * @param int $priority
-     * @param int $accepted_args
      * @return bool
      */
-	public function removeFilter($tag, $function_to_remove, $priority = 10, $accepted_args = 1)
+	public function removeFilter($tag, $function_to_remove, $priority = 10)
 	{
 		$tag = $this->getFilterTag($tag);
-		return remove_filter($tag, $function_to_remove, $priority, $accepted_args);
+		return remove_filter($tag, $function_to_remove, $priority);
 	}
 
-
+    /**
+     * Add the default actions common to all metamaterial instances.
+     *
+     */
     public function addDefaultActions(){
 
         $actions = array(
             'save'=>3,
+            'enqueue'=>1,
             'head'=>1,
             'foot'=>1,
             'init'=>1
@@ -1100,11 +982,10 @@ abstract class Metamaterial
             }
         }
     }
+
 	/**
 	 * Used to properly prefix an action tag, making the tag is unique to this metabox instance
 	 *
-	 * @since	0.1
-	 * @access	protected
 	 * @param	string $tag name of the action
 	 * @return	string uniquely prefixed tag name
 	 */
@@ -1155,13 +1036,8 @@ abstract class Metamaterial
 	/**
 	 * Uses WordPress has_action() function, see WordPress has_action()
 	 *
-	 * @since    0.1
-	 * @access    public
-	 * @link    http://core.trac.wordpress.org/browser/trunk/wp-includes/plugin.php#L492
-	 *
 	 * @param $tag
 	 * @param bool $function_to_check
-	 *
 	 * @return bool|int
 	 */
 	public function hasAction($tag, $function_to_check = FALSE)
@@ -1173,31 +1049,22 @@ abstract class Metamaterial
 	/**
 	 * Uses WordPress remove_action() function, see WordPress remove_action()
 	 *
-	 * @since    0.1
-	 * @access    public
-	 *
 	 * @param $tag
 	 * @param $function_to_remove
 	 * @param int $priority
-	 * @param int $accepted_args
-	 *
 	 * @return bool
 	 */
-	public function removeAction($tag, $function_to_remove, $priority = 10, $accepted_args = 1)
+	public function removeAction($tag, $function_to_remove, $priority = 10)
 	{
 		$tag = $this->getActionTag($tag);
-		return remove_action($tag, $function_to_remove, $priority, $accepted_args);
+		return remove_action($tag, $function_to_remove, $priority);
 	}
 
 	/**
 	 * Uses WordPress do_action() function, see WordPress do_action()
-	 *
-	 * @since    0.1
-	 * @access    public
-	 *
+     *
 	 * @param $tag
 	 * @param string $arg
-	 *
 	 * @return mixed
 	 */
 	public function doAction($tag, $arg = '')
@@ -1210,12 +1077,9 @@ abstract class Metamaterial
 	/**
 	 * Used to check if we are on a target admin page
 	 *
-	 * @static
-	 * @since	0.1
-	 * @access	private
 	 * @return	bool if this is a target admin page
 	 */
-	protected static function isTargetAdmin()
+	public static function isTargetAdmin()
 	{
         global $hook_suffix;
 
@@ -1227,16 +1091,19 @@ abstract class Metamaterial
 	}
 
 	/**
-	 * @return mixed
+     * Determine if this instance should display on the current admin page
+     *
+	 * @return bool
 	 */
-	public abstract function can_output();
-
+	public abstract function canOutput();
 
 
 	/**
+     * Return this instance's hide_on_screen config value
+     *
 	 * @return array
 	 */
-	public function get_hide_on_screen()
+	public function getHideOnScreen()
     {
         if (empty($this->hide_on_screen)) {
             $this->hide_on_screen = array();
@@ -1244,201 +1111,88 @@ abstract class Metamaterial
         return $this->hide_on_screen;
     }
 
-	/**
-	 * @return string
-	 */
-	private static function get_global_styles()
-    {
-        $styles = array();
-        foreach(self::$instances as $inst){
-            /** @var $inst Metamaterial[] */
-            if(!empty($inst)){
-                $styles= array_merge($styles, reset($inst)->get_global_style());
-            }
+    /**
+     * Constructs a full asset url from a relative path or filename.
+     *
+     * Will search relative the the current theme directory (stylesheet directory),
+     * followed by the default assets directory.
+     *
+     * @param string $asset a filename or file path
+     * @return bool|string
+     */
+	public function getAssetUrl($asset){
+
+        if( file_exists(trailingslashit( get_stylesheet_directory()) . $asset )){
+            return trailingslashit( get_stylesheet_directory_uri()) . $asset;
         }
-        return apply_filters('metamaterial_filter_global_styles',$styles);
-
-    }
-
-    private static function print_global_styles(){
-        $styles = self::get_global_styles();
-        if(!empty($styles) && is_array($styles)){
-        ?>
-            <style type="text/css" id="metamaterial_global_style"><?php echo implode("\r\n",$styles); ?></style>
-        <?php
-        }
-    }
-
-
-	public function get_asset_url($asset){
-
-		if( $this->assets_url && $this->assets_dir ){
-			if(file_exists($this->assets_dir . $asset)) {
-				return $this->assets_url . $asset;
-			}
-		}
 
 		if(static::$default_assets_url && static::$default_assets_dir) {
-			if ( file_exists( static::$default_assets_dir . $asset ) ) {
-				return static::$default_assets_url  . $asset;
+			if ( file_exists( trailingslashit(static::$default_assets_dir) . $asset ) ) {
+				return trailingslashit(static::$default_assets_url)  . $asset;
 			}
-		}
-
-		if( file_exists(trailingslashit( get_stylesheet_directory_uri()) . $asset )){
-			return trailingslashit( get_stylesheet_directory()) . $asset;
 		}
 
 		return false;
 	}
 
 	/**
-	 *
+     * Get any type specific styles
+     *
+	 * @return array returns associative array of style urls, keyed by a unique handle for enqueueing
 	 */
-	private static function print_global_scripts()
-	{
-		?>
-		<script type="text/javascript">
-			var METAMATERIAL = {};
-		</script>
-		<?php
-        $scripts = self::get_global_scripts();
-        if(!empty($scripts) && is_array($scripts)) {
-            foreach ($scripts as $script) {
-            ?>
-            <script type="text/javascript" src="<?php echo $script ?>"></script>
-            <?php
-            }
-        }
-	}
+	public function getGlobalStyle(){
 
-	/**
-	 * Gathers the global scripts for each active Metamaterial instance
-	 * @return array
-	 */
-	private static function get_global_scripts()
-    {
-        $scripts = array();
-	    //foreach Metamaterial class
-        foreach(self::$instances as $inst){
-            /** @var $inst Metamaterial[] */
-	        //if there is an instance
-            if(!empty($inst)){
-	            //get the global script for the first instance only as they should all be the same.
-                $script = reset($inst)->get_global_script();
-	            if($script){
-		            //add to the global scripts collection
-		            $scripts[] = $script;
-	            }
-            }
-        }
-		//return through filter to allow possible modification
-        return apply_filters('metamaterial_filter_global_scripts',$scripts);
+        $script = $this->getGlobalStyleUri();
+
+        return apply_filters(
+            'metamaterial_filter_' . strtolower(MMM::unNamespaceIt(get_called_class())). '_global_style',
+            array(MMM::unNamespaceIt(get_called_class()) => $script)
+        );
+
     }
 
-	/**
-	 * @return mixed
-	 */
-	public abstract function get_global_style();
-
-	/**
-	 * @return bool|string
-	 */
-	public function get_global_script()
-	{
-
-		// must be a targeted admin page
-		if (!self::isTargetAdmin()) {
-			return false;
-		}
-		$script = $this->get_asset_url($this->get_global_script_name());
-		if(file_exists($script)){
-			return $script;
-		}else{
-			return false;
-		}
-	}
-
-	public function get_global_script_name()
-	{
-		return 'js/' . get_called_class() . '/global.js';
-	}
-
-
-	/**
-	 * @return string
-	 */
-	public static function build_global_style()
+    /**
+     * Get the Uri for this Metamaterial types global stylesheet
+     *
+     * @return bool|string
+     */
+    public function getGlobalStyleUri()
     {
-        $style='';
-
-        $showing = self::getShowing();
-
-        if(empty($showing)){
-			return '';
-		}
-
-        $hide_on_screen = array();
-        if (static::$compound_hide) {
-            foreach($showing as $mm){
-                foreach($mm->get_hide_on_screen() as $k){
-                    if(!in_array($k, $hide_on_screen)){
-                        $hide_on_screen[]=$k;
-                    }
-                }
-            }
-        } else {
-            $hide_on_screen = reset($showing)->get_hide_on_screen();
-        }
-
-        foreach ($hide_on_screen as $hide) {
-            if (array_key_exists($hide,static::$hide_on_screen_styles)){
-                $style.= static::$hide_on_screen_styles[$hide];
-            }
-        }
-
-        return $style;
+        return $this->getAssetUrl('css/' . MMM::unNamespaceIt(get_called_class()) . '.css');
     }
 
-
-	/**
-	 * Used to insert global STYLE or SCRIPT tags into the head, called on
-	 * WordPress admin_head action.
-	 *
-	 * @static
-	 * @since	0.1
-	 * @access	private
-	 * @see		globalFoot()
-	 */
-	static function globalHead()
+    /**
+     * Get any type specific scripts
+     *
+     * @return array returns associative array of script urls, keyed by a unique handle for enqueueing
+     */
+	public function getGlobalScript()
 	{
-        self::print_global_styles();
-		self::print_global_scripts();
+        $script = $this->getGlobalScriptUri();
+
+        return apply_filters(
+            'metamaterial_filter_' . strtolower(MMM::unNamespaceIt(get_called_class())). '_global_script',
+            array(MMM::unNamespaceIt(get_called_class()) => $script)
+        );
 	}
 
-	/**
-	 * Used to insert global SCRIPT tags into the footer, called on WordPress
-	 * admin_footer action.
-	 *
-	 * @static
-	 * @since	0.1
-	 * @access	public
-	 * @see		globalHead()
-	 */
-	public static function globalFoot()
+    /**
+     * Get the Uri for this Metamaterial types global script
+     *
+     * @return bool|string
+     */
+	public function getGlobalScriptUri()
 	{
-
+		return $this->getAssetUrl('js/' . MMM::unNamespaceIt(get_called_class()) . '.js');
 	}
 
 	/**
 	 * Gets the meta data for a meta box
 	 *
-	 * @since	0.1
-	 * @access	public
 	 * @param	int $post_id optional post ID for which to retrieve the meta data
 	 * @return	array
-	 * @see		meta
 	 */
-	function the_meta($post_id = NULL)
+	public function the_meta($post_id = NULL)
 	{
 		return $this->meta($post_id);
 	}
@@ -1449,55 +1203,47 @@ abstract class Metamaterial
 	 * Internal method calls will typically bypass the data retrieval and will
 	 * immediately return the current meta data
 	 *
-	 * @since	0.1
-	 * @access	private
 	 * @param	int $object_id optional post ID for which to retrieve the meta data
 	 * @param	bool $internal optional boolean if internally calling
 	 * @return	array
-	 * @see		the_meta()
 	 */
     public abstract function meta($object_id = NULL, $internal = FALSE);
 
-
-	// user can also use the_ID(), php functions are case-insensitive
 	/**
-	 * @since	0.1
-	 * @access	public
+	 * Prints this instances id.
+     * can also use the_ID(), php functions are case-insensitive
 	 */
-	function the_id()
+	public function the_id()
 	{
 		echo $this->get_the_id();
 	}
 
-	/**
-	 * @since	0.1
-	 * @access	public
-	 */
+    /**
+     * Simple accessor for this instances id.
+     * can also use the_ID(), php functions are case-insensitive
+     */
 	function get_the_id()
 	{
 		return $this->id;
 	}
 
 	/**
-	 * @since    0.1
-	 * @access    public
-	 *
-	 * @param $n
-	 * @param null $hint
+	 * Set the current field focus
+     *
+	 * @param string $n field name to focus on
+	 * @param bool $multi if this field can have multiple submitted values i.e checkboxes
 	 */
-	function the_field($n, $hint = NULL)
+	function the_field($n, $multi = false)
 	{
 		$this->name = $n;
-		$this->hint = $hint;
+		$this->is_multi = $multi;
 	}
 
 	/**
-	 * @since    0.1
-	 * @access    public
+	 * Check if a field has a value
 	 *
-	 * @param null $n
-	 *
-	 * @return bool
+	 * @param null|string $n the name of a field to check, omit to check the current focused field
+	 * @return bool if the current field has a value
 	 */
 	function have_value($n = NULL)
 	{
@@ -1506,67 +1252,50 @@ abstract class Metamaterial
 		return FALSE;
 	}
 
-	/**
-	 * @since    0.1
-	 * @access    public
-	 *
-	 * @param null $n
-	 */
+    /**
+     * Print a field value
+     *
+     * @param null|string $n the name of a field to print, omit to print the current focused field value
+     */
 	function the_value($n = NULL)
 	{
 		echo $this->get_the_value($n);
 	}
 
 	/**
-	 * @since    0.1
-	 * @access    public
-	 *
-	 * @param null $n
-	 * @param bool $collection
-	 *
-	 * @return array|null|string
+	 * Retrieve a field value
+     *
+	 * @param null|string $n the name of a field to retrieve, omit to retrieve the current focused field value
+	 * @param bool $collection if the field is the member of a group return the whole group
+	 * @return mixed
 	 */
 	function get_the_value($n = NULL, $collection = FALSE)
 	{
 		$this->meta(NULL, TRUE);
 
         $value = null;
+        $n = is_null($n) ? $this->name : $n ;
 
-		if ($this->is_in_loop())
+		if ($this->isInLoop())
 		{
-			$n = is_null($n) ? $this->name : $n ;
+            $keys = $this->getNestedMetaPath();
 
-			if(!is_null($n))
-			{
-				if ($collection)
-				{
-					$keys   = $this->get_the_loop_group_name_array();
-				}
-				else
-				{
-					$keys   = $this->get_the_loop_group_name_array();
-					$keys[] = $n;
-				}
-			}
-			else
-			{
-				if ($collection)
-				{
-					$keys   = $this->get_the_loop_group_name_array();
-					end($keys);
-					$last   = key($keys);
-					unset($keys[$last]);
-				}
-				else
-				{
-					$keys   = $this->get_the_loop_group_name_array();
-				}
-			}
-			$value = $this->get_meta_by_array($keys);
+            if(is_null($n) && $collection){
+
+                end($keys);
+                $last   = key($keys);
+                unset($keys[$last]);
+
+            }elseif(!$collection){
+
+                $keys[] = $n;
+
+            }
+
+			$value = $this->getNestedMetaValue($keys);
 		}
 		else
 		{
-			$n = is_null($n) ? $this->name : $n ;
 
 			if(isset($this->meta[$n]))
 			{
@@ -1582,40 +1311,33 @@ abstract class Metamaterial
 			}
 			else
 			{
-				// http://wordpress.org/support/topic/call-function-called-by-embed-shortcode-direct
-				// http://phpdoc.wordpress.org/trunk/WordPress/Embed/WP_Embed.html#run_shortcode
-
                 global /** @var $wp_embed WP_Embed */
                 $wp_embed;
 
 				return do_shortcode($wp_embed->run_shortcode($value));
 			}
 		}
-		else
-		{
-			// value can sometimes be an array
-			return $value;
-		}
+
+
+        return $value;
+
 	}
 
-	/**
-	 * @since    0.1
-	 * @access    public
-	 *
-	 * @param null $n
-	 */
+    /**
+     * Print a field name
+     *
+     * @param null|string $n the name of a field name to print, omit to print the current focused field value
+     */
 	function the_name($n = NULL)
 	{
 		echo $this->get_the_name($n);
 	}
 
 	/**
-	 * @since    0.1
-	 * @access    public
-	 *
-	 * @param null $n
-	 *
-	 * @return string
+	 * Retrieve a field name
+     *
+	 * @param null|string $n the name of a field name to print, omit to print the current focused field value
+	 * @return string the fields name
 	 */
 	function get_the_name($n = NULL)
 	{
@@ -1628,14 +1350,14 @@ abstract class Metamaterial
             }
 		}
 
-        if ($this->is_in_loop())
+        if ($this->isInLoop())
 		{
 			$n = is_null($n) ? $this->name : $n ;
 
 			if (!is_null($n))
-				$the_field = $this->get_the_loop_group_name(TRUE) . '[' . $n . ']' ;
+				$the_field = $this->getNestedMetaName() . '[' . $n . ']' ;
 			else
-				$the_field = $this->get_the_loop_group_name(TRUE);
+				$the_field = $this->getNestedMetaName();
 		}
 		else
 		{
@@ -1644,13 +1366,7 @@ abstract class Metamaterial
 			$the_field = $this->id . '[' . $n . ']';
 		}
 
-		$hints = array
-		(
-			self::HINT_CHECKBOX_MULTI,
-			self::HINT_SELECT_MULTI
-		);
-
-		if (in_array($this->hint, $hints))
+		if ($this->is_multi)
 		{
 			$the_field .= '[]';
 		}
@@ -1659,69 +1375,49 @@ abstract class Metamaterial
 	}
 
 	/**
-	 * @since	0.1
-	 * @access	public
+     * Print the current field index
+     *
+     * Will print the current field index within any group, or 0 when not within a group.
 	 */
 	function the_index()
 	{
 		echo $this->get_the_index();
 	}
 
-	/**
-	 * @since	0.1
-	 * @access	public
-	 */
+    /**
+     * Get the current field index
+     *
+     * @return int the current field index within any group, or 0 when not within a group.
+     */
 	function get_the_index()
 	{
-		return $this->in_loop ? $this->current : 0 ;
+		return $this->isInLoop() ? $this->getCurrentLoop()->current : 0 ;
 	}
 
 	/**
-	 * @since	0.1
-	 * @access	public
+	 * Check if the current field is the first in its group.
+     *
+     * @return bool if the current field is the first in its group.
 	 */
 	function is_first()
 	{
-		if ($this->in_loop AND $this->current == 0) return TRUE;
+		if ($this->isInLoop() && $this->getCurrentLoop()->is_first()){
+            return TRUE;
+        }
 
 		return FALSE;
 	}
 
-	/**
-	 * @since	0.1
-	 * @access	public
-	 */
+    /**
+     * Check if the current field is the last in its group.
+     *
+     * @return bool if the current field is the last in its group.
+     */
 	function is_last()
 	{
-		if ($this->in_loop AND ($this->current+1) == $this->length) return TRUE;
-
-		return FALSE;
-	}
-
-	/**
-	 * Used to check if a value is a match
-	 *
-	 * @since	0.1
-	 * @access	public
-	 * @param	string $n the field name to check or the value to check for (if the_field() is used prior)
-	 * @param	string $v optional the value to check for
-	 * @return	bool
-	 * @see		is_value()
-	 */
-	function is_value($n, $v = NULL)
-	{
-		if (is_null($v))
-		{
-			$the_value = $this->get_the_value();
-
-			$v = $n;
-		}
-		else
-		{
-			$the_value = $this->get_the_value($n);
-		}
-
-		if($v == $the_value) return TRUE;
+        if ($this->isInLoop() && $this->getCurrentLoop()->is_last()){
+            return TRUE;
+        }
 
 		return FALSE;
 	}
@@ -1730,13 +1426,10 @@ abstract class Metamaterial
 	 * Used to check if a value is selected, useful when working with checkbox,
 	 * radio and select values.
 	 *
-	 * @since	0.1
-	 * @access	public
 	 * @param	string $n the field name to check or the value to check for (if the_field() is used prior)
 	 * @param	string $v optional the value to check for
      * @param   boolean $is_default if this is the default option
 	 * @return	bool
-	 * @see		is_value()
 	 */
 	public function is_selected($n, $v = NULL, $is_default = FALSE)
 	{
@@ -1772,12 +1465,9 @@ abstract class Metamaterial
 	 * Prints the current state of a checkbox field and should be used inline
 	 * within the INPUT tag.
 	 *
-	 * @since	0.1
-	 * @access	public
 	 * @param	string $n the field name to check or the value to check for (if the_field() is used prior)
 	 * @param	string $v optional the value to check for
      * @param   boolean $is_default if this is the default option
-	 * @see		get_the_checkbox_state()
 	 */
 	function the_checkbox_state($n, $v = NULL, $is_default = FALSE)
 	{
@@ -1788,13 +1478,10 @@ abstract class Metamaterial
 	 * Returns the current state of a checkbox field, the returned string is
 	 * suitable to be used inline within the INPUT tag.
 	 *
-	 * @since	0.1
-	 * @access	public
 	 * @param	string $n the field name to check or the value to check for (if the_field() is used prior)
 	 * @param	string $v optional the value to check for
      * @param   boolean $is_default if this is the default option
 	 * @return	string suitable to be used inline within the INPUT tag
-	 * @see		the_checkbox_state()
 	 */
 	function get_the_checkbox_state($n, $v = NULL, $is_default = FALSE)
 	{
@@ -1808,12 +1495,9 @@ abstract class Metamaterial
 	 * Prints the current state of a radio field and should be used inline
 	 * within the INPUT tag.
 	 *
-	 * @since	0.1
-	 * @access	public
 	 * @param	string $n the field name to check or the value to check for (if the_field() is used prior)
 	 * @param	string $v optional the value to check for
      * @param   boolean $is_default if this is the default option
-	 * @see		get_the_radio_state()
 	 */
 	function the_radio_state($n, $v = NULL, $is_default = FALSE)
 	{
@@ -1824,13 +1508,10 @@ abstract class Metamaterial
 	 * Returns the current state of a radio field, the returned string is
 	 * suitable to be used inline within the INPUT tag.
 	 *
-	 * @since	0.1
-	 * @access	public
 	 * @param	string $n the field name to check or the value to check for (if the_field() is used prior)
 	 * @param	string $v optional the value to check for
      * @param   boolean $is_default if this is the default option
 	 * @return	string suitable to be used inline within the INPUT tag
-	 * @see		the_radio_state()
 	 */
 	function get_the_radio_state($n, $v = NULL, $is_default = FALSE)
 	{
@@ -1841,12 +1522,9 @@ abstract class Metamaterial
 	 * Prints the current state of a select field and should be used inline
 	 * within the SELECT tag.
 	 *
-	 * @since	0.1
-	 * @access	public
 	 * @param	string $n the field name to check or the value to check for (if the_field() is used prior)
 	 * @param	string $v optional the value to check for
      * @param   boolean $is_default if this is the default option
-	 * @see		get_the_select_state()
 	 */
 	function the_select_state($n, $v = NULL, $is_default = FALSE)
 	{
@@ -1857,13 +1535,10 @@ abstract class Metamaterial
 	 * Returns the current state of a select field, the returned string is
 	 * suitable to be used inline within the SELECT tag.
 	 *
-	 * @since	0.1
-	 * @access	public
 	 * @param	string $n the field name to check or the value to check for (if the_field() is used prior)
 	 * @param	string $v optional the value to check for
      * @param   boolean $is_default if this is the default option
 	 * @return	string suitable to be used inline within the SELECT tag
-	 * @see		the_select_state()
 	 */
 	function get_the_select_state($n, $v = NULL, $is_default = FALSE)
 	{
@@ -1874,31 +1549,31 @@ abstract class Metamaterial
 	}
 
     /**
-     * Open a field group for use in a loop.
+     * Print the opening tag of a field group for use in a loop.
      *
      * @param string $t group element tag
      * @param string $w wrapper element tag
      * @param bool $sortable if the group should be sortable within its loop
      */
-    function the_group_open($t = 'div',$w='div',$sortable = FALSE)
+    function the_group_open($sortable=FALSE, $t='div', $w='div')
 	{
-		echo $this->get_the_group_open($t,$w,$sortable);
+		echo $this->get_the_group_open($sortable,$t,$w);
 	}
 
     /**
-     * Open a field group for use in a loop.
+     * Retrieve the opening tag of a field group for use in a loop.
      *
      * @param string $t group element tag
      * @param string $w wrapper element tag
      * @param bool $sortable if the group should be sortable within its loop
      * @return string group opening tag, preceded y a wrapping tag if first in loop.
      */
-	function get_the_group_open($t = 'div', $w='div', $sortable = FALSE)
+	function get_the_group_open($sortable=FALSE, $t='div', $w='div')
 	{
 		$this->group_tag = $t;
         $this->loop_tag = $w;
 
-		$curr_loop = $this->get_the_current_loop();
+		$curr_loop = $this->getCurrentLoop();
 
         $curr_loop->group_tag = $t;
         $curr_loop->loop_tag = $w;
@@ -1935,7 +1610,7 @@ abstract class Metamaterial
 		{
 			array_push($css_class, 'last');
 
-			if ($this->in_loop == 'multi')
+			if ($curr_loop->type == 'multi')
 			{
 				array_push($css_class, 'mm_tocopy');
 			}
@@ -1945,8 +1620,7 @@ abstract class Metamaterial
 	}
 
 	/**
-	 * @since	0.1
-	 * @access	public
+	 * Print the closing tag of a field group within a loop.
 	 */
 	function the_group_close()
 	{
@@ -1954,14 +1628,15 @@ abstract class Metamaterial
 	}
 
 	/**
-	 * @since	0.1
-	 * @access	public
+	 * Retrieve the closing tag of a field group within a loop.
+     *
+     * @return string the closing tag of the current group within a loop
 	 */
 	function get_the_group_close()
 	{
 		$loop_close = NULL;
 
-		$curr_loop = $this->get_the_current_loop();
+		$curr_loop = $this->getCurrentLoop();
 
 		if ($curr_loop->is_last())
 		{
@@ -1972,120 +1647,94 @@ abstract class Metamaterial
 	}
 
 	/**
-	 * @since    0.1
-	 * @access    public
+	 * Create a repeatable field or field group.
 	 *
-	 * @param $n
-	 * @param null $length
-	 * @param null $limit
-	 *
-	 * @return bool
+	 * @param string $n a name for the field or field group
+	 * @param int|null $length the initial number of items to display the form for, note this is a minimum
+	 * 	but will be overridden if there is a larger number of saved values.
+	 * @param null $limit limit the number of items that are allowed for this field or field group, leave as null for no limit.
+	 * @return bool true if there are still values to iterate over within the current loop, false otherwise.
 	 */
 	function have_fields_and_multi($n, $length = NULL,$limit = NULL)
 	{
 
 		$this->meta(NULL, TRUE);
-
-		$this->in_loop = 'multi';
-
-        // push new loop or set loop to current name
-		$this->push_or_set_current_loop($n, $length, $this->in_loop,$limit);
-
-		return $this->loop($length, TRUE);
+		$this->pushOrSetCurrentLoop($n, $length, 'multi', $limit);
+		return $this->loop();
 	}
 
 	/**
-	 * @since    0.1
-	 * @access    public
+	 * Create a fixed muber of a field or field group.
 	 *
-	 * @param $n
-	 * @param null $length
-	 *
-	 * @return bool
+	 * @param string $n a name for the field or field group
+	 * @param int|null $length the number of items to display the form for.
+	 * @return bool true if there are still values to iterate over within the current loop, false otherwise.
 	 */
 	function have_fields($n,$length=NULL)
 	{
 		$this->meta(NULL, TRUE);
-		$this->in_loop = 'normal';
-        $this->push_or_set_current_loop($n, $length, $this->in_loop);
-		return $this->loop($length);
+        $this->pushOrSetCurrentLoop($n, $length, 'normal');
+		return $this->loop();
 	}
 
 	/**
-	 * @since    0.1
-	 * @access    private
+	 * Iterate the current loop and determine if there are more values to show.
 	 *
-	 * @param null $length
-	 * @param bool $and_one
-	 *
-	 * @return bool
+	 * @return bool true if there are still values to iterate over within the current loop, false otherwise.
 	 */
-    function loop($length=NULL,$and_one=FALSE)
+    protected function loop()
 	{
-		if (!$this->in_loop)
+        $currentLoop = $this->getCurrentLoop();
+
+		$cnt = $this->getCurrentLoopCount();
+
+        $currentLoop->length = is_null($currentLoop->length) ? $cnt : $currentLoop->length;
+
+		if ($currentLoop->type == 'multi' && $cnt > $currentLoop->length){
+            $currentLoop->length = $cnt;
+        }
+
+        if($this->in_template && $currentLoop->and_one){
+            $currentLoop->length++;
+			$currentLoop->and_one = FALSE;
+        }
+
+		$currentLoop->current++;
+		//error_log(print_r($currentLoop,true));
+		if ($currentLoop->current < $currentLoop->length)
 		{
-			$this->in_loop = TRUE;
-		}
-
-		$cnt = $this->get_the_current_group_count();
-
-		$length = is_null($length) ? $cnt : $length ;
-
-		if ($this->in_loop == 'multi' AND $cnt > $length) $length = $cnt;
-
-		$this->length = $length;
-
-		if ($this->in_template )
-		{
-			if ($length == 0 AND $and_one)
-			{
-				$this->length = 1;
-			}
-			else
-			{
-				$this->length = $length+1;
-			}
-		}
-
-		$this->set_the_current_group_length($this->length);
-		$this->increment_current_loop();
-		$this->current++;
-
-		if ($this->get_the_current_group_current() < $this->get_the_current_group_length())
-		{
-			$this->name      = NULL;
+			$this->name = NULL;
 
 			return TRUE;
 		}
-		else if ($this->get_the_current_group_current() == $this->get_the_current_group_length())
+		else if ($currentLoop->current == $currentLoop->length)
 		{
-			$this->name      = NULL;
-			$this->set_the_current_group_current(-1);
-			$this->prev_loop();
+			$this->name = NULL;
+            $currentLoop->current = -1;
+			$currentLoop->length = $currentLoop->initLength;
+			$currentLoop->and_one = ($currentLoop->type=='multi');
+			$this->popLoop();
 		}
-
-		$this->in_loop = FALSE;
-        $this->current =-1;
-		$this->loop_data = new stdClass;
 
 		return FALSE;
 	}
 
 	/**
-	 * @since    0.1
-	 * @access    public
+	 * Save the posted meta data for the provided object ID.
 	 *
-	 * @param $object_id
-	 * @param bool $is_ajax
+	 * Classes of Metamaterial should implement this method to persist data appropriately.
 	 *
-	 * @return
+	 * @param int $object_id the objects id to save data for.
+	 * @param bool $is_ajax if the save is part of an ajax request.
+	 * @return integer the $object_id
 	 */
 	public abstract function save($object_id,$is_ajax=FALSE);
 
 
     /**
-     * @since	0.1
-     * @access	public
+     * Trigger a save from an ajax request.
+	 *
+	 * Verifies nonce and that an object if was provided before proceeding.
      */
     public function ajax_save(){
         check_ajax_referer($this->id,'mm_nonce');
@@ -2100,12 +1749,11 @@ abstract class Metamaterial
     }
 
 	/**
-	 * Cleans an array, removing blank ('') values
+	 * Cleans an array, removing blank ('') values and arrays.
+     *
+     * Will reindex numerically keyed arrays
 	 *
-	 * @static
-	 * @since	0.1
-	 * @access	public
-	 * @param	array $arr the array to clean (passed by reference)
+	 * @param array $arr the array to clean (passed by reference)
 	 */
 	static function clean(&$arr)
 	{
@@ -2159,17 +1807,18 @@ abstract class Metamaterial
 	}
 
 	/**
+     * Push a new loop onto the loop stack
+     *
 	 * @param $name
 	 * @param $length
 	 * @param $type
 	 * @param null $limit
-	 *
 	 * @return MM_Loop
 	 */
-	function push_loop($name, $length, $type, $limit = NULL)
+	function pushLoop($name, $length, $type, $limit = NULL)
 	{
 		$loop         = new MM_Loop($name, $length, $type, $limit);
-		$parent       = $this->get_the_current_loop();
+		$parent       = $this->getCurrentLoop();
 		if($parent)
 			$loop->parent = $parent->name;
 		else
@@ -2179,25 +1828,29 @@ abstract class Metamaterial
 	}
 
 	/**
+     * Set the current loop within the loop stack pushing onto the stack if a loop fo this $name is not already present.
+     *
 	 * @param $name
 	 * @param $length
 	 * @param $type
 	 * @param null $limit
 	 */
-	function push_or_set_current_loop($name, $length, $type,$limit = NULL)
+	function pushOrSetCurrentLoop($name, $length, $type, $limit = NULL)
 	{
 		if( !array_key_exists( $name, $this->loop_stack ) )
 		{
-			$this->push_loop($name, $length, $type, $limit);
+			$this->pushLoop($name, $length, $type, $limit);
 		}
 
-		$this->set_current_loop($name);
+		$this->setCurrentLoop($name);
 	}
 
 	/**
-	 * @param $name
+     * Set the current loop within the loop stack.
+     *
+	 * @param $name string the name of the loop to set as current
 	 */
-	function set_current_loop($name)
+	function setCurrentLoop($name)
 	{
 		reset($this->loop_stack);
 		if(!array_key_exists($name, $this->loop_stack)){
@@ -2206,26 +1859,19 @@ abstract class Metamaterial
 		while(key($this->loop_stack) !== $name){
 			next($this->loop_stack);
         }
-        $this->current = current($this->loop_stack)->current;
 	}
 
 	/**
-	 * @return mixed
+     * Pop the last loop off of the loop stack returning to its parent if there is one.
+     *
+	 * @return bool return true if we are still in a loop after popping.
 	 */
-	function next_loop()
+	function popLoop()
 	{
-		return next($this->loop_stack);
-	}
-
-	/**
-	 * @return bool
-	 */
-	function prev_loop()
-	{
-		$parent = $this->get_the_current_loop()->parent;
+		$parent = $this->getCurrentLoop()->parent;
 		if($parent)
 		{
-			$this->set_current_loop($parent);
+			$this->setCurrentLoop($parent);
             return TRUE;
 		}
 		else
@@ -2236,83 +1882,48 @@ abstract class Metamaterial
 		}
 	}
 
-	/**
-	 * @return mixed
-	 */
-	function get_the_current_group_length()
-	{
-		return current($this->loop_stack)->length;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	function get_the_current_group_current()
-	{
-		return current($this->loop_stack)->current;
-	}
-
-	/**
-	 * @param $length
-	 */
-	function set_the_current_group_length($length)
-	{
-		current($this->loop_stack)->length = $length;
-	}
-
-	/**
-	 * @param $current
-	 */
-	function set_the_current_group_current($current)
-	{
-		current($this->loop_stack)->current = $current;
-	}
-
     /**
-     * @param string|null $name
+     * Get the stack of loop objects up to the current loop in an ordered array.
+     *
      * @return MM_Loop[]
      */
-    function get_the_loop_collection($name = null)
+    protected function getCurrentLoopStack()
 	{
 		$collection   = array();
 
-		if(is_null($name))
-		{
-			$curr = $this->get_the_current_loop();
-			if($curr)
-			{
-				$name         = $curr->name;
-				$loop_stack   = $this->loop_stack;
-				$loop         = $loop_stack[$name];
-				$collection[] = $loop;
-				while ($loop)
-				{
-					$collection[] = $loop;
-					if($loop->parent)
-						$loop = $loop_stack[$loop->parent];
-					else
-						$loop = FALSE;
-				}
-				$collection = array_reverse($collection);
-			}
-		}
+        $curr = $this->getCurrentLoop();
+        if($curr)
+        {
+            $loop_stack   = $this->loop_stack;
+            $loop         = $loop_stack[$curr->name];
+            $collection[] = $loop;
+            while ($loop)
+            {
+                $collection[] = $loop;
+                if($loop->parent)
+                    $loop = $loop_stack[$loop->parent];
+                else
+                    $loop = FALSE;
+            }
+            $collection = array_reverse($collection);
+        }
 
 		return $collection;
 	}
 
 	/**
-	 * @param bool $with_id
+	 * Get the field name for the current focused nested meta value
 	 *
 	 * @return string
 	 */
-	function get_the_loop_group_name($with_id = FALSE)
+	protected function getNestedMetaName()
 	{
-		$loop_name  = $with_id ? $this->id : '';
-		$curr       = $this->get_the_current_loop();
+		$loop_name  = $this->id;
+		$curr       = $this->getCurrentLoop();
 
 		// copy loop_stack to prevent internal pointer ruined
-		$loop_stack = $this->get_the_loop_collection();
-		// print_r($loop_stack);
+		$loop_stack = $this->getCurrentLoopStack();
+
 		foreach ($loop_stack as $loop)
 		{
 			$loop_name .= '[' . $loop->name . '][' . $loop->current . ']';
@@ -2324,41 +1935,17 @@ abstract class Metamaterial
 	}
 
 	/**
-	 * @return int
-	 */
-	function get_the_loop_level()
-	{
-		$curr  = $this->get_the_current_loop();
-		$depth = 0;
-
-		// copy loop_stack to prevent internal pointer ruined
-		$loop_stack = $this->get_the_loop_collection();
-		foreach ($loop_stack as $loop)
-		{
-			if($loop->name === $curr->name)
-				break;
-			$depth++;
-		}
-		return $depth;
-	}
-
-	/**
-	 * @param bool $with_id
-	 *
+	 * Get an ordered array of the names and indexes needed to build the field name of the current loop field.
+     *
 	 * @return array
 	 */
-	function get_the_loop_group_name_array($with_id = FALSE)
+	protected function getNestedMetaPath()
 	{
 		$loop_name   = array();
-		$curr        = $this->get_the_current_loop();
-
-		if($with_id)
-		{
-			$loop_name[] = $this->id;
-		}
+		$curr        = $this->getCurrentLoop();
 
 		// copy loop_stack to prevent internal pointer ruined
-		$loop_stack = $this->get_the_loop_collection();
+		$loop_stack = $this->getCurrentLoopStack();
 		foreach ($loop_stack as $loop)
 		{
 			$loop_name[] = $loop->name;
@@ -2371,100 +1958,85 @@ abstract class Metamaterial
 	}
 
 	/**
-	 * @param $arr
-	 *
-	 * @return array|null
+     * Get the value of a nested meta field
+     *
+	 * @param $keys array an ordered array of the names and indexes to be used to traverse to the requested meta value
+	 * @return mixed the value of the requested meta field
 	 */
-	function get_meta_by_array($arr)
+	protected function getNestedMetaValue($keys)
 	{
 		$meta = $this->meta;
 
-		if(!is_array($arr) || !is_array($meta) || is_null($meta))
-			return null;
+		if(!is_array($keys) || !is_array($meta) || is_null($meta)) {
+            return null;
+        }
 
-		foreach ($arr as $key)
+		$value = $this->meta;
+		foreach ($keys as $key)
 		{
-			if(is_array($meta) and array_key_exists($key, $meta))
+			if(is_array($meta) and array_key_exists($key, $value))
 			{
-				$meta = $meta[$key];
+				$value = $value[$key];
 			}
 			else
 			{
 				return null;
 			}
 		}
-		return $meta;
+		return $value;
 	}
 
 	/**
-	 * @return int
+     * Get the count of the number of saved items within the current loop
+     *
+	 * @return int the count of the number of saved items within the current loop
 	 */
-	function get_the_current_group_count()
+	function getCurrentLoopCount()
 	{
-		$arr  = $this->get_the_loop_group_name_array();
+		$arr  = $this->getNestedMetaPath();
 		end($arr);
 		$last = key($arr);
 		unset($arr[$last]);
-		$meta = $this->get_meta_by_array($arr);
+		$meta = $this->getNestedMetaValue($arr);
 		return count($meta);
 	}
 
 	/**
-	 *
+     * Get the current loop within the loop stack
+	 * @return MM_Loop
 	 */
-	function increment_current_loop()
-	{
-		current($this->loop_stack)->current++;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	function get_the_current_loop()
+	protected function getCurrentLoop()
 	{
 		return current($this->loop_stack);
 	}
 
 	/**
-	 * @return bool
+     * Check if we are currently in any loop within a loop stack
+     *
+	 * @return bool if we are currently in any loop within a loop stack
 	 */
-	function is_in_multi_last()
+	protected function isInLoop()
 	{
-		// copy loop_stack to prevent internal pointer ruined
-		$loop_stack = $this->get_the_loop_collection();
-		foreach ($loop_stack as $loop)
-		{
-			if($loop->type === 'multi' and $loop->is_last())
-				return TRUE;
-		}
-		return FALSE;
-	}
+		if(current($this->loop_stack) === FALSE) {
+            return FALSE;
+        }
 
-	/**
-	 * @return bool
-	 */
-	function is_in_loop()
-	{
-		if(current($this->loop_stack) === FALSE)
-			return FALSE;
 		return TRUE;
 	}
 
-	/**
-	 * @param bool $after
-	 *
-	 * @return string
-	 */
-	function the_copy_button_class($after=FALSE)
-	{
-        $loop_stack = $this->loop_stack;
-        $a = next($loop_stack);
-        if($after){
-            $name = ($a)?$a->name:$this->name;
-            return 'mm_docopy-' . $name;
-        }else{
-            return 'mm_docopy-' . current($this->loop_stack)->name;
-        }
-	}
+    /**
+     * Ensure the value is an array, wrapping it in one if necessary.
+     * Will create an array from a string of comma separated values.
+     *
+     * @param $value array|string the value to check.
+     * @return array the value wrapping in an array if necessary.
+     */
+    public static function ensureArray($value){
+            if (!empty($value) AND !is_array($value))
+            {
+                $value = array_map('trim',explode(',',$value));
+            }
+        return $value;
+    }
 
 }

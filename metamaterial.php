@@ -1,4 +1,7 @@
 <?php
+/*
+Plugin Name: Metamaterial
+*/
 
 if(!class_exists( 'HaddowG\MetaMaterial\Metamaterial' )) {
 
@@ -8,7 +11,11 @@ if(!class_exists( 'HaddowG\MetaMaterial\Metamaterial' )) {
 		}
 	);
 
-	\HaddowG\MetaMaterial\Metamaterial::$default_assets_url = plugin_dir_url(__FILE__).'src/haddowg/metamaterial/';
-	\HaddowG\MetaMaterial\Metamaterial::$default_assets_dir = plugin_dir_path(__FILE__).'src/haddowg/metamaterial/';
+
+	add_action('init',function(){
+		\HaddowG\MetaMaterial\Metamaterial::$default_assets_url = plugins_url('src/haddowg/metamaterial/',__FILE__);
+		\HaddowG\MetaMaterial\Metamaterial::$default_assets_dir = plugin_dir_path(__FILE__).'src/haddowg/metamaterial/';
+	});
+
 
 }

@@ -15,3 +15,5 @@ function _manually_load_plugin() {
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 require $_tests_dir . '/bootstrap.php';
+
+require dirname(dirname(__FILE__)) .'/support/WPIntegratedTest.php';

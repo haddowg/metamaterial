@@ -1,4 +1,14 @@
 (function($){
+
+    if(typeof window.METAMATERIAL === 'undefined'){
+        window.METAMATERIAL = {};
+    }
+	var METAMATERIAL = window.METAMATERIAL;
+
+    METAMATERIAL.LANG = {
+        DEFAULT_DELETE_CONFIRM:'This action can not be undone, are you sure?'
+    };
+
     METAMATERIAL.UTILS = {
 
         incrementIndex : function($container, $the_name, $index){
@@ -85,6 +95,10 @@
         display_ajax_alert : function ($message, $type, $metabox){
             var $class= $type=='error'?'error':($type=='success'?'updated':'update-nag');
             $metabox.find('.mm_ajax_notice').show().html('<div class="' + $class + '"><p>' + $message + '</p></div>').delay(4000).fadeOut();
+        },
+
+        clear_ajax_alert : function ($metabox) {
+            $metabox.find('.mm_ajax_notice').html('').hide();
         },
 
         checkLoopLimit : function(name,$context)

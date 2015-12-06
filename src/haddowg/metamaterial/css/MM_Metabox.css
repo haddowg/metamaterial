@@ -1,0 +1,15 @@
+/* locked header style */
+.postbox.locked > h3 { cursor:pointer; }
+
+/* open locked header style */
+.postbox.locked.open > h3 { cursor:inherit; }
+
+/* hide tocopy's */
+.mm_group.mm_tocopy { display:none; }
+
+/* spacing for after_title */
+#after_title-sortables{ margin-top:20px; }
+
+/* spacing for after_editor */
+#after_editor-sortables{ margin-top:20px; }
+

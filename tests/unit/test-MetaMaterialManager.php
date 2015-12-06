@@ -1,19 +1,9 @@
 <?php
 
-use HaddowG\MetaMaterial\MetaMaterialManager;
-use HaddowG\MetaMaterial\Metamaterial;
+use HaddowG\MetaMaterial\MM_Minimal;
 use HaddowG\MetaMaterial\Facades\MMM;
 
 class MetaMaterialManagerTest extends MetaMaterialTestCase {
-
-    public function setUp(){
-        parent::setUp();
-    }
-
-    public function tearDown() {
-        parent::tearDown();
-    }
-
 
     function test_registerAlias_removesAliasIfNullProvided(){
 
@@ -94,7 +84,6 @@ class MetaMaterialManagerTest extends MetaMaterialTestCase {
 
     /**
      * @test
-     * @group wip
      */
     function test_getInstance_returnsCorrectInstance_whenTypeProvided() {
         $mm = MMM::getInstance('test','HaddowG\MetaMaterial\MM_Minimal');
@@ -142,10 +131,14 @@ class MetaMaterialManagerTest extends MetaMaterialTestCase {
 
 
     public function testGlobalInit_returnsFalse_ifNoShowingMetamaterials(){
-        MMM::shouldReceive('getShowing')->andReturn([]);
+        MMM::shouldReceive('getShowing')->andReturn(array());
         $this->assertFalse(MMM::globalInit());
     }
 
+    /**
+     *
+     * @test
+     */
     public function testGlobalInit_callsAppropriateMethods(){
 
 
@@ -164,8 +157,8 @@ class MetaMaterialManagerTest extends MetaMaterialTestCase {
             return $mm;
         });
 
-        $conf = array_merge(self::$MINIMAL_CONF,['ajax_save'=>true]);
-        $mm  = Metamaterial::getInstance('test',$conf,'HaddowG\MetaMaterial\MM_Minimal');
+        $conf = array_merge(self::$MINIMAL_CONF, array('ajax_save'=>true));
+        $mm  = MM_Minimal::getInstance('test',$conf);
 
         MMM::registerAlias('HaddowG\MetaMaterial\MM_Minimal',function(){
             $mm = Mockery::mock('HaddowG\MetaMaterial\MM_Minimal')->shouldAllowMockingProtectedMethods();
@@ -182,11 +175,11 @@ class MetaMaterialManagerTest extends MetaMaterialTestCase {
             return $mm;
         });
 
-        $conf2 = array_merge(self::$MINIMAL_CONF,['ajax_save'=>false]);
-        $mm2  = MetaMaterial::getInstance('test2',$conf2,'HaddowG\MetaMaterial\MM_Minimal');
+        $conf2 = array_merge(self::$MINIMAL_CONF, array('ajax_save'=>false));
+        $mm2  = MM_Minimal::getInstance('test2',$conf2);
 
-        MMM::shouldReceive('getShowing')->andReturn([$mm,$mm2]);
-
+        MMM::shouldReceive('getShowing')->andReturn(array($mm,$mm2));
+        MMM::shouldReceive('getShowingTypes')->andReturn(array('HaddowG\MetaMaterial\MM_Minimal'));
         MMM::globalInit();
     }
 

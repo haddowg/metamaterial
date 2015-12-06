@@ -1,31 +1,36 @@
-(function($){
+
+	if(typeof window.METAMATERIAL === 'undefined'){
+		window.METAMATERIAL = {};
+	}
+	var METAMATERIAL = window.METAMATERIAL;
+
     METAMATERIAL.MM_METABOX = {
 
         //runs after all document loads, i.e after standard wordpress js initialisation.
-        onLoad: function()
+        onLoad: function($)
         {
             //prevent collapse toggle for ALWAYS_OPEN metaboxes
-            jQuery('.postbox.open > h3, .postbox.open .hndle').unbind('click.postboxes');
+            $('.postbox.open > h3, .postbox.open .hndle').unbind('click.postboxes');
 
         },
 
-        onReady: function(){
+        onReady: function($){
             //hide screen options
-            jQuery('.postbox.hide-screen-option').each(function(){
-                jQuery('.metabox-prefs label[for='+ jQuery(this).attr('id') +'-hide]').remove();
+            $('.postbox.hide-screen-option').each(function(){
+                $('.metabox-prefs label[for='+ $(this).attr('id') +'-hide]').remove();
             });
 
             //remove titles for headless metaboxes
-            jQuery('.postbox.headless > h3, .postbox.headless > .handlediv').remove();
+            $('.postbox.headless > h3, .postbox.headless > .handlediv').remove();
 
             //remove toggle div for ALWAYS_OPEN metaboxes
-            jQuery('.postbox.open .handlediv').remove();
+            $('.postbox.open .handlediv').remove();
 
             //prevent dragging of locked metaboxes
-            jQuery('.postbox.locked > h3').removeClass('hndle');
+            $('.postbox.locked > h3').removeClass('hndle');
 
             //move before_title metaboxes
-            jQuery('#before_title-sortables').prependTo('#post-body-content');
+            $('#before_title-sortables').prependTo('#post-body-content');
 
             $('.mm_loop[data-mm_sortable="true"]').sortable();
 
@@ -155,7 +160,7 @@
                 e.preventDefault();
 
                 var $metabox = $(this).closest('.postbox');
-                $metabox.find('.mm_ajax_notice').html('').hide();
+                METAMATERIAL.UTILS.clear_ajax_alert($metabox);
                 var $mm_id = $metabox.attr('id').match(/([a-zA-Z0-9_-]*?)_metamaterial/i);
                 $mm_id = ($mm_id && $mm_id[1]) ? $mm_id[1] : null ;
                 if(!$mm_id){
@@ -174,7 +179,9 @@
                     post_type: $pt
                 };
                 $data = $.param($data) + '&' + $fields.serialize();
-                $.post(ajaxurl,$data, function($response){ return METAMATERIAL.UTILS.process_ajax($response, $(this), $metabox, $on_success,$on_error);});
+                $.post(ajaxurl,$data, function($response){
+                    return METAMATERIAL.UTILS.process_ajax($response, $(this), $metabox, $on_success,$on_error);
+                });
             });
 
 
@@ -188,10 +195,10 @@
             });
         }
     };
-})(jQuery);
+
 
 //runs after all document loads, i.e after standard wordpress js initialisation.
-jQuery(window).load(METAMATERIAL.MM_METABOX.onLoad());
+jQuery(window).load(METAMATERIAL.MM_METABOX.onLoad(jQuery));
 
 //on document ready
-jQuery(METAMATERIAL.MM_METABOX.onReady());
+jQuery(document).ready(METAMATERIAL.MM_METABOX.onReady(jQuery));

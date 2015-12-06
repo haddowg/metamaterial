@@ -1,6 +1,6 @@
 <?php
 use HaddowG\MetaMaterial\Facades\MMM;
-use HaddowG\MetaMaterial\MetaMaterialManager;
+use HaddowG\MetaMaterial\MetamaterialManager;
 
 class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
 
@@ -28,7 +28,7 @@ class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
 
     public function tearDown() {
         WP_Mock::tearDown();
-        MMM::swap(new MetaMaterialManager());
+        MMM::swap(new MetamaterialManager());
         MMM::purgeInstances();
     }
 
@@ -37,10 +37,10 @@ class MetaMaterialTestCase extends PHPUnit_Framework_TestCase {
         self::$SUPPORT_DIR = dirname(dirname(__FILE__)) . '/support/';
     }
 
-    public function registerMockAlias($classname, $stubs=[], $base=true){
+    public function registerMockAlias($classname, $stubs= array(), $base=true){
         MMM::registerAlias($classname,function() use($classname, $stubs, $base){
 
-            $methods = ($base)?['applyBaseConfig','applyConfig','initInstanceActions']:[];
+            $methods = ($base)? array('applyBaseConfig','applyConfig','initInstanceActions') : array();
             foreach(array_keys($stubs) as $method){
                 $methods[] = $method;
             }
