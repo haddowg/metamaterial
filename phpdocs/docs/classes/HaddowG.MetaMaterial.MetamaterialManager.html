@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta charset="utf-8"/>
+    <title>metamaterial</title>
+    <meta name="author" content=""/>
+    <meta name="description" content=""/>
+
+    <link href="../css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="../css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/prism.css" rel="stylesheet" media="all"/>
+    <link href="../css/template.css" rel="stylesheet" media="all"/>
+    
+    <!--[if lt IE 9]>
+    <script src="../js/html5.js"></script>
+    <![endif]-->
+    <script src="../js/jquery-1.11.0.min.js"></script>
+    <script src="../js/ui/1.10.4/jquery-ui.min.js"></script>
+    <script src="../js/bootstrap.min.js"></script>
+    <script src="../js/jquery.smooth-scroll.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <!-- TODO: Add http://jscrollpane.kelvinluck.com/ to style the scrollbars for browsers not using webkit-->
+    <script type="text/javascript">
+    function loadExternalCodeSnippets() {
+        Array.prototype.slice.call(document.querySelectorAll('pre[data-src]')).forEach(function (pre) {
+            var src = pre.getAttribute('data-src');
+            var extension = (src.match(/\.(\w+)$/) || [, ''])[1];
+            var language = 'php';
+
+            var code = document.createElement('code');
+            code.className = 'language-' + language;
+
+            pre.textContent = '';
+
+            code.textContent = 'Loading…';
+
+            pre.appendChild(code);
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('GET', src, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+
+                    if (xhr.status < 400 && xhr.responseText) {
+                        code.textContent = xhr.responseText;
+
+                        Prism.highlightElement(code);
+                    }
+                    else if (xhr.status >= 400) {
+                        code.textContent = '✖ Error ' + xhr.status + ' while fetching file: ' + xhr.statusText;
+                    }
+                    else {
+                        code.textContent = '✖ Error: File does not exist or is empty';
+                    }
+                }
+            };
+
+            xhr.send(null);
+        });
+    }
+
+    $(document).ready(function(){
+        loadExternalCodeSnippets();
+    });
+    $('#source-view').on('shown', function () {
+        loadExternalCodeSnippets();
+    })
+</script>
+
+    <link rel="shortcut icon" href="../images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="../images/apple-touch-icon.png"/>
+    <link rel="apple-touch-icon" sizes="72x72" href="../images/apple-touch-icon-72x72.png"/>
+    <link rel="apple-touch-icon" sizes="114x114" href="../images/apple-touch-icon-114x114.png"/>
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <i class="icon-ellipsis-vertical"></i>
+            </a>
+            <a class="brand" href="../index.html">metamaterial</a>
+
+            <div class="nav-collapse">
+                <ul class="nav pull-right">
+                                        <li class="dropdown">
+                        <a href="../index.html" class="dropdown-toggle" data-toggle="dropdown">
+                            API Documentation <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                                                        <li><a href="../namespaces/HaddowG.html">\HaddowG</a></li>
+                                                    </ul>
+                    </li>
+                                        <li class="dropdown" id="charts-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Charts <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="../graphs/class.html">
+                                    <i class="icon-list-alt"></i>&#160;Class hierarchy diagram
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="reports-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Reports <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="../reports/errors.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <i class="icon-list-alt"></i>&#160;Errors <span class="label label-info pull-right">97</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../reports/markers.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    <i class="icon-list-alt"></i>&#160;Markers <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../reports/deprecated.html">
+                                                                                                            <i class="icon-list-alt"></i>&#160;Deprecated <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--<div class="go_to_top">-->
+    <!--<a href="#___" style="color: inherit">Back to top&#160;&#160;<i class="icon-upload icon-white"></i></a>-->
+    <!--</div>-->
+</div>
+
+<div id="___" class="container-fluid">
+        <section class="row-fluid">
+        <div class="span2 sidebar">
+                                <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-699397253"></a>
+                                <a href="../namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
+            </div>
+            <div id="namespace-699397253" class="accordion-body collapse in">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1031125300"></a>
+                                <a href="../namespaces/HaddowG.html" style="margin-left: 30px; padding-left: 0">HaddowG</a>
+            </div>
+            <div id="namespace-1031125300" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-483984773"></a>
+                                <a href="../namespaces/HaddowG.MetaMaterial.html" style="margin-left: 30px; padding-left: 0">MetaMaterial</a>
+            </div>
+            <div id="namespace-483984773" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                                                    <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle collapsed" data-toggle="collapse" data-target="#namespace-1327985388"></a>
+                                <a href="../namespaces/HaddowG.MetaMaterial.Facades.html" style="margin-left: 30px; padding-left: 0">Facades</a>
+            </div>
+            <div id="namespace-1327985388" class="accordion-body collapse ">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.Facades.MMM.html">MMM</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.Metamaterial.html">Metamaterial</a></li>
+                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html">MetamaterialManager</a></li>
+                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.MM_Dashboard.html">MM_Dashboard</a></li>
+                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.MM_Exception.html">MM_Exception</a></li>
+                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.MM_Loop.html">MM_Loop</a></li>
+                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.MM_Metabox.html">MM_Metabox</a></li>
+                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.MM_Taxonomy.html">MM_Taxonomy</a></li>
+                                                    <li class="class"><a href="../classes/HaddowG.MetaMaterial.MM_User.html">MM_User</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                    
+                    <ul>
+                                                                                                    <li class="class"><a href="../classes/MM_MediaAccess.html">MM_MediaAccess</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        </div>
+    </section>
+    <section class="row-fluid">
+        <div class="span10 offset2">
+            <div class="row-fluid">
+                <div class="span8 content class">
+                    <nav>
+                                                <a href="../namespaces/HaddowG.MetaMaterial.html">\HaddowG\MetaMaterial</a> <i class="icon-level-up"></i>
+                                            </nav>
+                    <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal"><i class="icon-code"></i></a>
+
+                    <h1><small>\HaddowG\MetaMaterial</small>MetamaterialManager</h1>
+                    <p><em>Class MetamaterialManager</em></p>
+                    <p>Manages registering of all metamaterial instances, organises the output of relevant instances,
+and the output of appropriate global scripts.</p>
+                    
+                                        
+                    <section id="summary">
+                        <h2>Summary</h2>
+                        <section class="row-fluid heading">
+                            <section class="span4">
+                                <a href="#methods">Methods</a>
+                            </section>
+                            <section class="span4">
+                                <a href="#properties">Properties</a>
+                            </section>
+                            <section class="span4">
+                                <a href="#constants">Constants</a>
+                            </section>
+                        </section>
+                        <section class="row-fluid public">
+                            <section class="span4">
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_getInstance" class="">getInstance()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_resolveAlias" class="">resolveAlias()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_registerAlias" class="">registerAlias()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_hasInstance" class="">hasInstance()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_purgeInstances" class="">purgeInstances()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_getInstances" class="">getInstances()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_listInstances" class="">listInstances()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_getShowing" class="">getShowing()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_getShowingTypes" class="">getShowingTypes()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_globalInit" class="">globalInit()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_getGlobalStyles" class="">getGlobalStyles()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_buildGlobalStyle" class="">buildGlobalStyle()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_isCompoundHide" class="">isCompoundHide()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_setCompoundHide" class="">setCompoundHide()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_printGlobalStyles" class="">printGlobalStyles()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_getGlobalScripts" class="">getGlobalScripts()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_globalEnqueue" class="">globalEnqueue()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_enqueue" class="">enqueue()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_head" class="">head()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_foot" class="">foot()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_namespaceIt" class="">namespaceIt()</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#method_unNamespaceIt" class="">unNamespaceIt()</a><br />
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No public properties found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No constants found</em>
+                                                            </section>
+                        </section>
+                        <section class="row-fluid protected">
+                            <section class="span4">
+                                                                    <em>No protected methods found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#property_instances" class="">$instances</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#property_registeredAliases" class="">$registeredAliases</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#property_compoundHide" class="">$compoundHide</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#property_allShowing" class="">$allShowing</a><br />
+                                                                    <a href="../classes/HaddowG.MetaMaterial.MetamaterialManager.html#property_allShowingTypes" class="">$allShowingTypes</a><br />
+                                                            </section>
+                            <section class="span4">
+                                <em>N/A</em>
+                            </section>
+                        </section>
+                        <section class="row-fluid private">
+                            <section class="span4">
+                                                                    <em>No private methods found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No private properties found</em>
+                                                            </section>
+                            <section class="span4">
+                                <em>N/A</em>
+                            </section>
+                        </section>
+                    </section>
+                </div>
+                <aside class="span4 detailsbar">
+                                        
+                    
+                    <dl>
+                        <dt>File</dt>
+                            <dd><a href="../files/MetamaterialManager.html"><div class="path-wrapper">MetamaterialManager.php</div></a></dd>
+                                                <dt>Package</dt>
+                            <dd><div class="namespace-wrapper">HaddowG\MetaMaterial</div></dd>
+                                                <dt>Class hierarchy</dt>
+                            <dd class="hierarchy">
+                                                                                                                                                                    <div class="namespace-wrapper">\HaddowG\MetaMaterial\MetamaterialManager</div>
+                            </dd>
+
+                        
+                        
+                        
+                        
+                                                                        </dl>
+                    <h2>Tags</h2>
+                    <table class="table table-condensed">
+                                            <tr><td colspan="2"><em>None found</em></td></tr>
+                                        </table>
+                </aside>
+            </div>
+
+                        
+                                    <a id="properties" name="properties"></a>
+            <div class="row-fluid">
+                <div class="span8 content class">
+                    <h2>Properties</h2>
+                </div>
+                <aside class="span4 detailsbar"></aside>
+            </div>
+
+                                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_instances" name="property_instances" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$instances</h3>
+                <pre class="signature">$instances : array</pre>
+                <p><em>Storage array for instances of MetaMaterial
+Instances are grouped into arrays by classname and then keyed by $id</em></p>
+                
+
+                                <h4>Type</h4>
+                array
+                &mdash; Array of arrays each of a type of  MetaMaterial instances                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_registeredAliases" name="property_registeredAliases" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$registeredAliases</h3>
+                <pre class="signature">$registeredAliases : array</pre>
+                <p><em>Provides an IOC mechanism to alter the classes returned by getInstance.</em></p>
+                <p>Array of classnames or factory methods keyed by target classname they will replace.
+SHould only be used for testing purposes, this is not designed for production use though could have potential
+use allow users to override the Metamaterial classes used in thirdparty code without having to modify or
+duplicate the code.</p>
+
+                                <h4>Type</h4>
+                array
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_compoundHide" name="property_compoundHide" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$compoundHide</h3>
+                <pre class="signature">$compoundHide : boolean</pre>
+                <p><em>If FALSE only the first showing metabox&#039;s $hide_on_screen values will be considered.</em></p>
+                <p>When this is the default TRUE all showing metaboxes have their $hide_on_screen values
+merged to determine what should be hidden.</p>
+<p>Config Option</p>
+
+                                <h4>Type</h4>
+                boolean
+                &mdash; whether to compound metabox $hide_on_screen values                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_allShowing" name="property_allShowing" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$allShowing</h3>
+                <pre class="signature">$allShowing : array</pre>
+                <p><em>Array of MetaMaterial instances showing on the current admin page.</em></p>
+                <p>Cached result of getShowing() to avoid re-execution.</p>
+
+                                <h4>Type</h4>
+                array
+                &mdash; Array of MetaMaterial instances showing on the current admin page                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_allShowingTypes" name="property_allShowingTypes" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$allShowingTypes</h3>
+                <pre class="signature">$allShowingTypes : array</pre>
+                <p><em>Array of Classes of MetaMaterial for which there is a showing Metamaterial instance on the current admin page.</em></p>
+                <p>Cached result of getShowing() to avoid re-execution.</p>
+
+                                <h4>Type</h4>
+                array
+                &mdash; Classes of MetaMaterial for which there is a showing Metamaterial instance on the current admin page.                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                            
+                                    <a id="methods" name="methods"></a>
+            <div class="row-fluid">
+                <div class="span8 content class"><h2>Methods</h2></div>
+                <aside class="span4 detailsbar"></aside>
+            </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getInstance" name="method_getInstance" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getInstance()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getInstance(string  <span class="argument">$id</span>, string|null  <span class="argument">$class = NULL</span>) : \HaddowG\MetaMaterial\Metamaterial</pre>
+                <p><em>Return or create instance of MetaMaterial.</em></p>
+                <p>If Instance with this $id exists it will be returned.
+If no existing instance exists with this id it will be constructed with the provided $config.</p>
+<p>If config was passed when an instance already exists for the provided $id an exception will be thrown.</p>
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$id </td>
+                                <td><p>Unique id for this MetaMaterial instance</p></td>
+                            </tr>
+                                                    <tr>
+                                <td>string|null</td>
+                                <td>$class </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                                    <h4>Throws</h4>
+                    <dl>
+                                                    <dt>\HaddowG\MetaMaterial\MM_Exception</dt>
+                            <dd></dd>
+                                                                    </dl>
+                
+                                    <h4>Returns</h4>
+                    <a href="../classes/HaddowG.MetaMaterial.Metamaterial.html">\HaddowG\MetaMaterial\Metamaterial</a>
+                                            &mdash; <p>new or existing instance of MetaMaterial</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_resolveAlias" name="method_resolveAlias" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">resolveAlias()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">resolveAlias(string  <span class="argument">$classname</span>) : callable</pre>
+                <p><em>Resolve a classname to an alias if one is registered</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$classname </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    callable
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_registerAlias" name="method_registerAlias" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">registerAlias()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">registerAlias(string  <span class="argument">$classname</span>, callable  <span class="argument">$resolution</span>) </pre>
+                <p><em>Register an alias to a classname</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$classname </td>
+                                <td></td>
+                            </tr>
+                                                    <tr>
+                                <td>callable</td>
+                                <td>$resolution </td>
+                                <td><p>classname or factory method</p></td>
+                            </tr>
+                                            </table>
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_hasInstance" name="method_hasInstance" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">hasInstance()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">hasInstance(  <span class="argument">$id</span>,   <span class="argument">$class</span>) : boolean</pre>
+                <p><em>Assert if Metamaterial instance exists for a specified id and class combination</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$id </td>
+                                <td><p>string metamaterial id</p></td>
+                            </tr>
+                                                    <tr>
+                                <td></td>
+                                <td>$class </td>
+                                <td><p>string classname of concrete implementation of Metamaterial</p></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    boolean
+                                            &mdash; <p>whether instance exists for specified id and class combination</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_purgeInstances" name="method_purgeInstances" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">purgeInstances()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">purgeInstances() </pre>
+                <p><em>Clear all registered metamaterial instances and aliases</em></p>
+                
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getInstances" name="method_getInstances" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getInstances()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getInstances() : array</pre>
+                <p><em>Get all registered metamaterial instances.</em></p>
+                <p>Instances are grouped into arrays by classname and then keyed by $id</p>
+
+                
+                
+                                    <h4>Returns</h4>
+                    array
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_listInstances" name="method_listInstances" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">listInstances()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">listInstances(boolean  <span class="argument">$return = false</span>) : null|string</pre>
+                <p><em>Produce a list of the registered metamaterial instances
+Useful for debugging purposes.</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>boolean</td>
+                                <td>$return </td>
+                                <td><p>pass true to return the list rather than echo</p></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    null|string
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getShowing" name="method_getShowing" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getShowing()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getShowing(boolean  <span class="argument">$sort = TRUE</span>) : array&lt;mixed,\HaddowG\MetaMaterial\Metamaterial&gt;</pre>
+                <p><em>Get an array of all metamaterial instances that are showing on the current admin page</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>boolean</td>
+                                <td>$sort </td>
+                                <td><p>true if the list should be sorted to display order or false to return in the order registered.</p></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    array&lt;mixed,<a href="../classes/HaddowG.MetaMaterial.Metamaterial.html">\HaddowG\MetaMaterial\Metamaterial</a>&gt;
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getShowingTypes" name="method_getShowingTypes" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getShowingTypes()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getShowingTypes() : array</pre>
+                <p><em>Get the classes of Metamaterial for which there are showing instances on the current admin page</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    array
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_globalInit" name="method_globalInit" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">globalInit()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">globalInit() </pre>
+                <p><em>Adds all appropriate metaboxes for the current page from any Instances of MetaMaterial.</em></p>
+                <p>Registers all necessary actions and filters and initialises each box as appropriate.</p>
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getGlobalStyles" name="method_getGlobalStyles" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getGlobalStyles()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getGlobalStyles() : array</pre>
+                <p><em>Get global styles for enqueueing</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    array
+                                            &mdash; <p>style uri's keyed by unique handle ready for enqueueing</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_buildGlobalStyle" name="method_buildGlobalStyle" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">buildGlobalStyle()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">buildGlobalStyle() </pre>
+                <p><em>Gather relevant hide_on_screen_styles for displayed metamaterial instances.</em></p>
+                
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_isCompoundHide" name="method_isCompoundHide" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">isCompoundHide()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">isCompoundHide() : boolean</pre>
+                <p><em>Check whether instance hide_on_screen values will be combined.</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    boolean
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_setCompoundHide" name="method_setCompoundHide" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">setCompoundHide()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">setCompoundHide(boolean  <span class="argument">$compoundHide</span>) </pre>
+                <p><em>Set whether instance hide_on_screen values will be combined.</em></p>
+                <p>Defaults to TRUE.
+If false only the first registered instance's hide_on_screen value will be considered.</p>
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>boolean</td>
+                                <td>$compoundHide </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_printGlobalStyles" name="method_printGlobalStyles" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">printGlobalStyles()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">printGlobalStyles() </pre>
+                <p><em>Print the global css style to hide desired on screen elements.</em></p>
+                <p>Combines appropriate styles for all relevant hide_on_screen_styles</p>
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getGlobalScripts" name="method_getGlobalScripts" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getGlobalScripts()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getGlobalScripts() : array</pre>
+                <p><em>Get global scripts for enqueueing</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    array
+                                            &mdash; <p>script uri's keyed by unique handle ready for enqueueing</p>
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_globalEnqueue" name="method_globalEnqueue" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">globalEnqueue()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">globalEnqueue() </pre>
+                <p><em>Enqueues global scripts.</em></p>
+                <p>Triggered on Wordpress admin_enqueue_scripts hook</p>
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_enqueue" name="method_enqueue" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">enqueue()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">enqueue() </pre>
+                <p><em>Enqueues scripts for each showing metamaterial instance.</em></p>
+                <p>Triggered on Wordpress admin_enqueue_scripts hook</p>
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_head" name="method_head" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">head()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">head() </pre>
+                <p><em>Used to insert STYLE or SCRIPT tags into the head for each showing metamaterial instance.</em></p>
+                <p>Triggered on WordPress admin_head action.</p>
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_foot" name="method_foot" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">foot()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">foot() </pre>
+                <p><em>Used to insert STYLE or SCRIPT tags into the footer for each showing metamaterial instance.</em></p>
+                <p>Triggered on WordPress admin_foot action.</p>
+
+                
+                
+                				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_namespaceIt" name="method_namespaceIt" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">namespaceIt()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">namespaceIt(  <span class="argument">$class</span>) : string</pre>
+                <p><em>Apply a namespace the provided classname within this package.</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$class </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    string
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_unNamespaceIt" name="method_unNamespaceIt" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">unNamespaceIt()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">unNamespaceIt(  <span class="argument">$class</span>) : mixed</pre>
+                <p><em>Remove the namespace from the provided fully qualified classname.</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td></td>
+                                <td>$class </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    mixed
+                                    				
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr><td colspan="2"><em>None found</em></td></tr>
+                            </table>
+        </aside>
+    </div>
+
+                                                                    </div>
+    </section>
+
+    <div id="source-view" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="source-view-label" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="source-view-label">MetamaterialManager.php</h3>
+        </div>
+        <div class="modal-body">
+            <pre data-src="../files/MetamaterialManager.php.txt" class="language-php line-numbers"></pre>
+        </div>
+    </div>
+
+    <footer class="row-fluid">
+        <section class="span10 offset2">
+            <section class="row-fluid">
+                <section class="span10 offset1">
+                    <section class="row-fluid footer-sections">
+                        <section class="span4">
+                                                        <h1><i class="icon-code"></i></h1>
+                            <div>
+                                <ul>
+                                                                            <li><a href="../namespaces/HaddowG.html">\HaddowG</a></li>
+                                                                    </ul>
+                            </div>
+                        </section>
+                        <section class="span4">
+                                                        <h1><i class="icon-bar-chart"></i></h1>
+                            <div>
+                                <ul>
+                                    <li><a href="../graphs/class.html">Class Hierarchy Diagram</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                        <section class="span4">
+                                                        <h1><i class="icon-pushpin"></i></h1>
+                            <div>
+                                <ul>
+                                    <li><a href="../reports/errors.html">Errors</a></li>
+                                    <li><a href="../reports/markers.html">Markers</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                    </section>
+                </section>
+            </section>
+            <section class="row-fluid">
+                <section class="span10 offset1">
+                    <hr />
+                    Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and authored
+                    on December 5th, 2015 at 16:22.
+                </section>
+            </section>
+        </section>
+    </footer>
+</div>
+
+</body>
+</html>
